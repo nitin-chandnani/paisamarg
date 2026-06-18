@@ -30,6 +30,18 @@ const GLOBAL_CSS = `
   }
   .pm-card:active{transform:translateY(-1px) !important}
 
+  /* ── Desktop responsive ────────────────────────────────── */
+  @media (min-width:640px){
+    .pm-content{ max-width:720px !important; }
+    .pm-home-cards{ grid-template-columns:repeat(3,1fr) !important; }
+    .pm-home-pad{ padding-left:28px !important; padding-right:28px !important; }
+    .pm-calc-inner{ max-width:580px; margin:0 auto; }
+  }
+  @media (min-width:1024px){
+    .pm-content{ max-width:980px !important; }
+    .pm-home-pad{ padding-left:48px !important; padding-right:48px !important; }
+  }
+
   /* Keyframes */
   @keyframes pmShine{
     0%{background-position:0% center}
@@ -117,7 +129,7 @@ const rupee = (n) => `\u20B9${fmtCr(n)}`;
 // ── Animated background orbs + dot grid ──────────────────────────────────────
 function BackgroundOrbs() {
   return (
-    <div style={{ position:"absolute", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0 }}>
+    <div style={{ position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0 }}>
       {/* Dot grid */}
       <div style={{
         position:"absolute", inset:0,
@@ -986,18 +998,18 @@ function DisclaimerBar({ calcId }) {
   const text = DISCLAIMERS[calcId];
   if (!text) return null;
   return (
-    <div style={{ marginTop:14, background:"rgba(6,12,24,0.85)", border:"1px solid rgba(255,255,255,0.04)", borderRadius:12, padding:"10px 14px" }}>
+    <div style={{ marginTop:14, background:"rgba(6,12,24,0.9)", border:"1px solid rgba(245,158,11,0.18)", borderRadius:12, padding:"12px 14px" }}>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8 }}>
-        <div style={{ color:"#334155", fontSize:11, fontFamily:"DM Sans, sans-serif", lineHeight:1.5, flex:1 }}>
+        <div style={{ color:"#94a3b8", fontSize:11, fontFamily:"DM Sans, sans-serif", lineHeight:1.5, flex:1 }}>
           ⚠️ {expanded ? text : text.slice(0,80) + (text.length > 80 ? "…" : "")}
         </div>
         {text.length > 80 && (
-          <button onClick={() => setExpanded(!expanded)} style={{ background:"none", border:"none", color:"#475569", fontSize:11, cursor:"pointer", fontFamily:"DM Sans, sans-serif", flexShrink:0, padding:0 }}>
+          <button onClick={() => setExpanded(!expanded)} style={{ background:"none", border:"none", color:"#64748b", fontSize:11, cursor:"pointer", fontFamily:"DM Sans, sans-serif", flexShrink:0, padding:0 }}>
             {expanded ? "Less" : "More"}
           </button>
         )}
       </div>
-      <div style={{ color:"#1e293b", fontSize:10, fontFamily:"DM Sans, sans-serif", marginTop:6 }}>
+      <div style={{ color:"#64748b", fontSize:10, fontFamily:"DM Sans, sans-serif", marginTop:6 }}>
         For reference only · Not financial advice · Consult a CA or SEBI-registered advisor
       </div>
     </div>
@@ -1071,7 +1083,7 @@ function HomeScreen({ onSelect }) {
   return (
     <div style={{ paddingBottom:40 }}>
       {/* Hero */}
-      <div style={{ padding:"30px 20px 0" }}>
+      <div className="pm-home-pad" style={{ padding:"30px 20px 0" }}>
         {/* Eyebrow badge */}
         <div style={{ display:"inline-flex", alignItems:"center", gap:6, background:"rgba(0,208,156,0.08)", border:"1px solid rgba(0,208,156,0.18)", borderRadius:20, padding:"5px 13px", marginBottom:18 }}>
           <div style={{ width:6, height:6, borderRadius:"50%", background:"#00d09c", animation:"pmPulse 2.2s ease-in-out infinite" }} />
@@ -1103,7 +1115,7 @@ function HomeScreen({ onSelect }) {
       </div>
 
       {/* Calculator cards */}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, padding:"16px 20px 0" }}>
+      <div className="pm-home-cards pm-home-pad" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, padding:"16px 20px 0" }}>
         {filtered.map((calc, i) => (
           <button
             key={calc.id}
@@ -1168,12 +1180,16 @@ export default function PaisaMarg() {
   const [activeId, setActiveId] = useState(null);
   const [emailModal, setEmailModal] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(() => {
-    try { return !localStorage.getItem("pm_disclaimer_accepted"); }
+    try {
+      // Version stamp — bump this string any time you want all users to see the disclaimer again
+      const VERSION = "v2";
+      return localStorage.getItem("pm_disclaimer_accepted") !== VERSION;
+    }
     catch { return true; }
   });
 
   const acceptDisclaimer = () => {
-    try { localStorage.setItem("pm_disclaimer_accepted", "1"); } catch {}
+    try { localStorage.setItem("pm_disclaimer_accepted", "v2"); } catch {}
     setShowDisclaimer(false);
   };
 
@@ -1223,14 +1239,13 @@ export default function PaisaMarg() {
       minHeight:"100vh",
       background:"#060c18",
       fontFamily:"DM Sans, sans-serif",
-      maxWidth:480, margin:"0 auto",
-      position:"relative", overflow:"hidden",
+      position:"relative",
     }}>
-      {/* Animated background — sits at z:0 */}
+      {/* Animated background — fixed, fills full viewport on all screen sizes */}
       <BackgroundOrbs />
 
-      {/* All content — z:1 above orbs */}
-      <div style={{ position:"relative", zIndex:1 }}>
+      {/* Content column — max 480px mobile, wider on desktop via CSS class */}
+      <div className="pm-content" style={{ maxWidth:480, margin:"0 auto", position:"relative", zIndex:1, minHeight:"100vh" }}>
 
         {/* Sticky header */}
         <div style={{
