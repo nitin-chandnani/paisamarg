@@ -990,8 +990,8 @@ function PrepaymentCalc() {
       let principal = emi - interest;
       // add extra monthly prepayment
       if (mode === "monthly") principal += extraMonthly;
-      // add one-time lump sum at the chosen month
-      if (mode === "lump" && months === lumpAtMonth) balance -= lumpSum;
+      // add one-time lump sum at the chosen month (never more than outstanding balance)
+      if (mode === "lump" && months === lumpAtMonth) balance -= Math.min(lumpSum, balance);
       balance -= principal;
       totalInterest += interest;
       months++;
@@ -1028,7 +1028,7 @@ function PrepaymentCalc() {
       <Slider label="Original Tenure" value={tenure} min={1} max={30} step={1} onChange={setTenure} display={`${tenure} yrs`} />
 
       {mode === "lump" ? (<>
-        <Slider label="Prepayment Amount" value={lumpSum} min={50000} max={20000000} step={50000} onChange={setLumpSum} display={rupee(lumpSum)} />
+        <Slider label="Prepayment Amount" value={Math.min(lumpSum, loan)} min={50000} max={loan} step={50000} onChange={setLumpSum} display={rupee(Math.min(lumpSum, loan))} />
         <Slider label="Prepay After" value={afterYears} min={0} max={tenure - 1} step={1} onChange={setAfterYears} display={afterYears === 0 ? "Immediately" : `${afterYears} yrs`} />
       </>) : (
         <Slider label="Extra Payment / Month" value={extraMonthly} min={1000} max={200000} step={1000} onChange={setExtraMonthly} display={rupee(extraMonthly)} />
