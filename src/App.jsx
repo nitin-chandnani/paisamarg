@@ -26,7 +26,7 @@ const GLOBAL_CSS = `
   }
   .pm-card:hover{
     transform:translateY(-5px) !important;
-    box-shadow:0 22px 44px rgba(0,0,0,0.55) !important;
+    box-shadow:0 22px 44px rgba(15,23,42,0.12) !important;
   }
   .pm-card:active{transform:translateY(-1px) !important}
 
@@ -130,32 +130,32 @@ const rupee = (n) => `\u20B9${fmtCr(n)}`;
 function BackgroundOrbs() {
   return (
     <div style={{ position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0 }}>
-      {/* Dot grid */}
+      {/* Dot grid — faint graph-paper texture */}
       <div style={{
         position:"absolute", inset:0,
-        backgroundImage:"radial-gradient(circle, rgba(30,41,59,0.7) 1px, transparent 1px)",
+        backgroundImage:"radial-gradient(circle, rgba(100,116,139,0.16) 1px, transparent 1px)",
         backgroundSize:"28px 28px",
-        opacity:0.55,
+        opacity:0.6,
       }} />
       {/* Green orb — top left */}
       <div style={{
-        position:"absolute", width:620, height:620, borderRadius:"50%",
-        background:"radial-gradient(circle at center,rgba(0,208,156,0.10) 0%,transparent 65%)",
-        top:-210, left:-160, filter:"blur(18px)",
+        position:"absolute", width:640, height:640, borderRadius:"50%",
+        background:"radial-gradient(circle at center,rgba(0,208,156,0.16) 0%,transparent 62%)",
+        top:-220, left:-170, filter:"blur(20px)",
         animation:"pmOrb1 20s ease-in-out infinite",
       }} />
       {/* Blue orb — bottom right */}
       <div style={{
-        position:"absolute", width:520, height:520, borderRadius:"50%",
-        background:"radial-gradient(circle at center,rgba(59,130,246,0.09) 0%,transparent 65%)",
-        bottom:-160, right:-160, filter:"blur(18px)",
+        position:"absolute", width:540, height:540, borderRadius:"50%",
+        background:"radial-gradient(circle at center,rgba(59,130,246,0.14) 0%,transparent 62%)",
+        bottom:-170, right:-170, filter:"blur(20px)",
         animation:"pmOrb2 25s ease-in-out infinite",
       }} />
       {/* Purple orb — mid */}
       <div style={{
-        position:"absolute", width:360, height:360, borderRadius:"50%",
-        background:"radial-gradient(circle at center,rgba(99,102,241,0.07) 0%,transparent 65%)",
-        top:"38%", left:"5%", filter:"blur(14px)",
+        position:"absolute", width:380, height:380, borderRadius:"50%",
+        background:"radial-gradient(circle at center,rgba(139,92,246,0.11) 0%,transparent 62%)",
+        top:"38%", left:"4%", filter:"blur(16px)",
         animation:"pmOrb3 30s ease-in-out infinite 7s",
       }} />
     </div>
@@ -185,7 +185,7 @@ function Slider({ label, value, min, max, step, onChange, display }) {
             onChange={(e) => setInputVal(e.target.value)}
             onBlur={commit} onKeyDown={onKey}
             style={{
-              background:"#0a1628", border:"2px solid #00d09c", color:"#00d09c",
+              background:"#ffffff", border:"2px solid #00d09c", color:"#00d09c",
               padding:"3px 10px", borderRadius:20, fontSize:13, fontWeight:700,
               fontFamily:"DM Sans, sans-serif", width:140, textAlign:"right", outline:"none",
             }}
@@ -203,7 +203,7 @@ function Slider({ label, value, min, max, step, onChange, display }) {
         )}
       </div>
       <div style={{ position:"relative", height:6 }}>
-        <div style={{ position:"absolute", inset:0, background:"rgba(30,41,59,0.9)", borderRadius:10 }} />
+        <div style={{ position:"absolute", inset:0, background:"rgba(226,232,240,0.9)", borderRadius:10 }} />
         <div style={{
           position:"absolute", top:0, left:0, bottom:0, width:`${pct}%`,
           background:"linear-gradient(90deg,#00d09c,#00b386)", borderRadius:10, transition:"width 0.12s",
@@ -215,7 +215,7 @@ function Slider({ label, value, min, max, step, onChange, display }) {
         <div style={{
           position:"absolute", left:`calc(${pct}% - 9px)`, top:-6,
           width:18, height:18, background:"#00d09c", borderRadius:"50%",
-          border:"3px solid #060c18", boxShadow:"0 0 0 3px rgba(0,208,156,0.28), 0 2px 8px rgba(0,208,156,0.3)",
+          border:"3px solid #f7f9fc", boxShadow:"0 0 0 3px rgba(0,208,156,0.28), 0 2px 8px rgba(0,208,156,0.3)",
           transition:"left 0.12s", pointerEvents:"none",
         }} />
       </div>
@@ -231,17 +231,17 @@ function ResultCard({ label, value, accent }) {
     : (len > 13 ? 11 : len > 11 ? 13 : len > 8 ? 15 : 18);
   return (
     <div style={{
-      background: accent ? "linear-gradient(135deg,rgba(0,208,156,0.12),rgba(0,179,134,0.06))" : "rgba(15,23,42,0.7)",
-      border:`1px solid ${accent ? "rgba(0,208,156,0.25)" : "rgba(255,255,255,0.06)"}`,
+      background: accent ? "linear-gradient(135deg,rgba(0,208,156,0.12),rgba(0,179,134,0.06))" : "rgba(255,255,255,0.75)",
+      border:`1px solid ${accent ? "rgba(0,208,156,0.25)" : "rgba(15,23,42,0.06)"}`,
       backdropFilter:"blur(8px)", WebkitBackdropFilter:"blur(8px)",
       borderRadius:14, padding:"14px 8px", textAlign:"center", overflow:"hidden",
     }}>
-      <div style={{ color:"#475569", fontSize:10, marginBottom:5, fontFamily:"DM Sans, sans-serif", textTransform:"uppercase", letterSpacing:0.8 }}>
+      <div style={{ color:"#64748b", fontSize:10, marginBottom:5, fontFamily:"DM Sans, sans-serif", textTransform:"uppercase", letterSpacing:0.8 }}>
         {label}
       </div>
       {/* key={value} causes React to remount this element on every change, re-triggering the animation */}
       <div key={value} style={{
-        color: accent ? "#00d09c" : "#e2e8f0",
+        color: accent ? "#00d09c" : "#1e293b",
         fontSize:fs, fontWeight:800, fontFamily:"Syne, sans-serif",
         lineHeight:1.2, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
         animation:"pmNumPop 0.38s cubic-bezier(0.34,1.56,0.64,1)",
@@ -260,15 +260,15 @@ function Donut({ a, b, labelA = "#00d09c", labelB = "#f97316" }) {
   const fs = totalStr.length > 10 ? 9 : 11;
   return (
     <svg width={140} height={140} viewBox="0 0 140 140">
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(30,41,59,0.8)" strokeWidth={16} />
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(226,232,240,0.9)" strokeWidth={16} />
       <circle cx={cx} cy={cy} r={r} fill="none" stroke={labelA} strokeWidth={16}
         strokeDasharray={`${aDash - gap} ${circ - aDash + gap}`}
         strokeDashoffset={circ / 4} strokeLinecap="round" />
       <circle cx={cx} cy={cy} r={r} fill="none" stroke={labelB} strokeWidth={16}
         strokeDasharray={`${bDash - gap} ${circ - bDash + gap}`}
         strokeDashoffset={circ / 4 - aDash + gap} strokeLinecap="round" />
-      <text x={cx} y={cy - 6} textAnchor="middle" fill="#475569" fontSize={9} fontFamily="DM Sans, sans-serif">Total</text>
-      <text x={cx} y={cy + 8} textAnchor="middle" fill="#e2e8f0" fontSize={fs} fontWeight={700} fontFamily="DM Sans, sans-serif">{totalStr}</text>
+      <text x={cx} y={cy - 6} textAnchor="middle" fill="#64748b" fontSize={9} fontFamily="DM Sans, sans-serif">Total</text>
+      <text x={cx} y={cy + 8} textAnchor="middle" fill="#1e293b" fontSize={fs} fontWeight={700} fontFamily="DM Sans, sans-serif">{totalStr}</text>
     </svg>
   );
 }
@@ -297,8 +297,8 @@ function GrowthBar({ invested, returns }) {
 // ── Stat Row ──────────────────────────────────────────────────────────────────
 function StatRow({ label, value, color = "#00d09c" }) {
   return (
-    <div style={{ display:"flex", justifyContent:"space-between", padding:"10px 14px", background:"rgba(10,16,30,0.8)", borderRadius:10, border:"1px solid rgba(255,255,255,0.05)", marginTop:10 }}>
-      <span style={{ color:"#475569", fontSize:12, fontFamily:"DM Sans, sans-serif" }}>{label}</span>
+    <div style={{ display:"flex", justifyContent:"space-between", padding:"10px 14px", background:"rgba(248,250,252,0.85)", borderRadius:10, border:"1px solid rgba(15,23,42,0.06)", marginTop:10 }}>
+      <span style={{ color:"#64748b", fontSize:12, fontFamily:"DM Sans, sans-serif" }}>{label}</span>
       <span style={{ color, fontWeight:700, fontSize:13, fontFamily:"Syne, sans-serif" }}>{value}</span>
     </div>
   );
@@ -370,7 +370,7 @@ function SIPCalc() {
         {["SIP","Lumpsum"].map(m => (
           <button key={m} onClick={() => setMode(m)} style={{
             flex:1, padding:"10px 0", borderRadius:12, border:"none", cursor:"pointer",
-            background: mode === m ? "linear-gradient(135deg,#00d09c,#00b386)" : "rgba(30,41,59,0.7)",
+            background: mode === m ? "linear-gradient(135deg,#00d09c,#00b386)" : "rgba(226,232,240,0.9)",
             color: mode === m ? "#fff" : "#64748b", fontWeight:700, fontSize:14,
             fontFamily:"Syne, sans-serif", transition:"all 0.2s",
             boxShadow: mode === m ? "0 4px 16px rgba(0,208,156,0.28)" : "none",
@@ -424,7 +424,7 @@ function FDCalc() {
         {["FD","RD"].map(m => (
           <button key={m} onClick={() => setMode(m)} style={{
             flex:1, padding:"10px 0", borderRadius:12, border:"none", cursor:"pointer",
-            background: mode === m ? "linear-gradient(135deg,#00d09c,#00b386)" : "rgba(30,41,59,0.7)",
+            background: mode === m ? "linear-gradient(135deg,#00d09c,#00b386)" : "rgba(226,232,240,0.9)",
             color: mode === m ? "#fff" : "#64748b", fontWeight:700, fontSize:14,
             fontFamily:"Syne, sans-serif", transition:"all 0.2s",
           }}>{m === "FD" ? "Fixed Deposit" : "Recurring Deposit"}</button>
@@ -514,7 +514,7 @@ function FIRECalc() {
         {[["need","🎯 What do I need?"],["have","💰 What will I have?"]].map(([m,lbl]) => (
           <button key={m} onClick={() => setMode(m)} style={{
             flex:1, padding:"10px 6px", borderRadius:12, border:"none", cursor:"pointer",
-            background: mode === m ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "rgba(30,41,59,0.7)",
+            background: mode === m ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "rgba(226,232,240,0.9)",
             color: mode === m ? "#fff" : "#64748b", fontWeight:700, fontSize:12,
             fontFamily:"Syne, sans-serif", transition:"all 0.2s",
             boxShadow: mode === m ? "0 4px 16px rgba(99,102,241,0.28)" : "none",
@@ -530,8 +530,8 @@ function FIRECalc() {
         <Slider label="Withdrawal Rate" value={withdrawalRate} min={2} max={8} step={0.5} onChange={setWithdrawalRate} display={`${withdrawalRate}%`} />
 
         <div style={{ background:"linear-gradient(135deg,rgba(99,102,241,0.14),rgba(139,92,246,0.07))", border:"1px solid rgba(99,102,241,0.25)", borderRadius:16, padding:"20px 16px", textAlign:"center", marginBottom:10 }}>
-          <div style={{ color:"#a5b4fc", fontSize:11, textTransform:"uppercase", letterSpacing:1, fontFamily:"DM Sans, sans-serif", marginBottom:6 }}>Your FIRE Number</div>
-          <div key={rupee(fireNumber)} style={{ color:"#818cf8", fontSize:32, fontWeight:800, fontFamily:"Syne, sans-serif", lineHeight:1, animation:"pmNumPop 0.4s cubic-bezier(0.34,1.56,0.64,1)" }}>{rupee(fireNumber)}</div>
+          <div style={{ color:"#4f46e5", fontSize:11, textTransform:"uppercase", letterSpacing:1, fontFamily:"DM Sans, sans-serif", marginBottom:6 }}>Your FIRE Number</div>
+          <div key={rupee(fireNumber)} style={{ color:"#4338ca", fontSize:32, fontWeight:800, fontFamily:"Syne, sans-serif", lineHeight:1, animation:"pmNumPop 0.4s cubic-bezier(0.34,1.56,0.64,1)" }}>{rupee(fireNumber)}</div>
           <div style={{ color:"#64748b", fontSize:11, marginTop:6, fontFamily:"DM Sans, sans-serif" }}>corpus needed to retire in {yearsToRetire} years</div>
         </div>
 
@@ -553,8 +553,8 @@ function FIRECalc() {
         <Slider label="Post-retirement Inflation" value={postInflation} min={2} max={10} step={0.5} onChange={setPostInflation} display={`${postInflation}%`} />
 
         <div style={{ background:"linear-gradient(135deg,rgba(99,102,241,0.14),rgba(139,92,246,0.07))", border:"1px solid rgba(99,102,241,0.25)", borderRadius:16, padding:"20px 16px", textAlign:"center", marginBottom:10 }}>
-          <div style={{ color:"#a5b4fc", fontSize:11, textTransform:"uppercase", letterSpacing:1, fontFamily:"DM Sans, sans-serif", marginBottom:6 }}>Projected Corpus at Retirement</div>
-          <div key={rupee(totalCorpus)} style={{ color:"#818cf8", fontSize:32, fontWeight:800, fontFamily:"Syne, sans-serif", lineHeight:1, animation:"pmNumPop 0.4s cubic-bezier(0.34,1.56,0.64,1)" }}>{rupee(totalCorpus)}</div>
+          <div style={{ color:"#4f46e5", fontSize:11, textTransform:"uppercase", letterSpacing:1, fontFamily:"DM Sans, sans-serif", marginBottom:6 }}>Projected Corpus at Retirement</div>
+          <div key={rupee(totalCorpus)} style={{ color:"#4338ca", fontSize:32, fontWeight:800, fontFamily:"Syne, sans-serif", lineHeight:1, animation:"pmNumPop 0.4s cubic-bezier(0.34,1.56,0.64,1)" }}>{rupee(totalCorpus)}</div>
           <div style={{ color:"#64748b", fontSize:11, marginTop:6, fontFamily:"DM Sans, sans-serif" }}>in {haveYears} years at {haveReturn}% return</div>
         </div>
 
@@ -565,7 +565,7 @@ function FIRECalc() {
           <ResultCard label="Withdrawal Rate" value={`${withdrawalRate}%`} />
         </div>
 
-        <div style={{ background:"rgba(10,16,30,0.8)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:14, padding:"16px", marginTop:4 }}>
+        <div style={{ background:"rgba(248,250,252,0.85)", border:"1px solid rgba(15,23,42,0.06)", borderRadius:14, padding:"16px", marginTop:4 }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
             <span style={{ color:"#64748b", fontSize:12, fontFamily:"DM Sans, sans-serif" }}>Corpus lasts</span>
             <span style={{ color:survivalColor, fontWeight:800, fontSize:15, fontFamily:"Syne, sans-serif" }}>
@@ -573,7 +573,7 @@ function FIRECalc() {
             </span>
           </div>
           {!corpusForever && (<>
-            <div style={{ background:"rgba(30,41,59,0.8)", borderRadius:8, height:10, overflow:"hidden" }}>
+            <div style={{ background:"rgba(226,232,240,0.9)", borderRadius:8, height:10, overflow:"hidden" }}>
               <div style={{ width:`${Math.min(100,(survivalYears/40)*100)}%`, background:survivalColor, height:"100%", borderRadius:8, transition:"width 0.4s" }} />
             </div>
             <div style={{ display:"flex", justifyContent:"space-between", marginTop:6 }}>
@@ -655,9 +655,9 @@ function CTCCalc() {
   const taxColor = (r) => r < 10 ? "#00d09c" : r < 20 ? "#f59e0b" : "#ef4444";
 
   const Toggle = ({ label, value, onChange }) => (
-    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>
+    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid rgba(15,23,42,0.06)" }}>
       <span style={{ color:"#64748b", fontSize:13, fontFamily:"DM Sans, sans-serif" }}>{label}</span>
-      <div onClick={() => onChange(!value)} style={{ width:44, height:24, borderRadius:12, cursor:"pointer", transition:"background 0.2s", background: value ? "#00d09c" : "#1e293b", position:"relative" }}>
+      <div onClick={() => onChange(!value)} style={{ width:44, height:24, borderRadius:12, cursor:"pointer", transition:"background 0.2s", background: value ? "#00d09c" : "#cbd5e1", position:"relative" }}>
         <div style={{ position:"absolute", top:3, left: value ? 23 : 3, width:18, height:18, borderRadius:"50%", background:"#fff", transition:"left 0.2s" }} />
       </div>
     </div>
@@ -677,15 +677,15 @@ function CTCCalc() {
       </div>
 
       <div style={{ marginBottom:18 }}>
-        <div style={{ color:"#475569", fontSize:11, fontFamily:"DM Sans, sans-serif", marginBottom:10, textTransform:"uppercase", letterSpacing:0.8 }}>Additional Income</div>
+        <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif", marginBottom:10, textTransform:"uppercase", letterSpacing:0.8 }}>Additional Income</div>
         <Slider label="Annual Bonus" value={bonus} min={0} max={5000000} step={25000} onChange={setBonus} display={bonus > 0 ? rupee(bonus) : "None"} />
         <Slider label="ESOP Exercise Value" value={esop} min={0} max={10000000} step={50000} onChange={setEsop} display={esop > 0 ? rupee(esop) : "None"} />
       </div>
 
       <div style={{ background:"linear-gradient(135deg,rgba(0,208,156,0.12),rgba(0,179,134,0.06))", border:"1px solid rgba(0,208,156,0.22)", borderRadius:16, padding:"18px 16px", textAlign:"center", marginBottom:10 }}>
-        <div style={{ color:"#6ee7b7", fontSize:11, textTransform:"uppercase", letterSpacing:1, fontFamily:"DM Sans, sans-serif", marginBottom:4 }}>Monthly In-Hand</div>
+        <div style={{ color:"#059669", fontSize:11, textTransform:"uppercase", letterSpacing:1, fontFamily:"DM Sans, sans-serif", marginBottom:4 }}>Monthly In-Hand</div>
         <div key={rupee(current.monthlyInHand)} style={{ color:"#00d09c", fontSize:34, fontWeight:800, fontFamily:"Syne, sans-serif", lineHeight:1, animation:"pmNumPop 0.4s cubic-bezier(0.34,1.56,0.64,1)" }}>{rupee(current.monthlyInHand)}</div>
-        <div style={{ color:"#475569", fontSize:11, marginTop:6, fontFamily:"DM Sans, sans-serif" }}>
+        <div style={{ color:"#64748b", fontSize:11, marginTop:6, fontFamily:"DM Sans, sans-serif" }}>
           Annual take-home: {rupee(current.monthlyInHand * 12)}{(bonus > 0 || esop > 0) ? " (excl. bonus/ESOP)" : ""}
         </div>
       </div>
@@ -697,12 +697,12 @@ function CTCCalc() {
         <ResultCard label="Gross Salary" value={rupee(current.gross)} />
       </div>
 
-      <div style={{ background:"rgba(10,16,30,0.8)", border:"1px solid rgba(255,255,255,0.05)", borderRadius:12, padding:"12px 14px", marginBottom:10 }}>
+      <div style={{ background:"rgba(248,250,252,0.85)", border:"1px solid rgba(15,23,42,0.06)", borderRadius:12, padding:"12px 14px", marginBottom:10 }}>
         <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
-          <span style={{ color:"#475569", fontSize:12, fontFamily:"DM Sans, sans-serif" }}>Tax burden</span>
+          <span style={{ color:"#64748b", fontSize:12, fontFamily:"DM Sans, sans-serif" }}>Tax burden</span>
           <span style={{ color:taxColor(current.effectiveTaxRate), fontWeight:700, fontSize:13, fontFamily:"Syne, sans-serif" }}>{current.effectiveTaxRate.toFixed(1)}%</span>
         </div>
-        <div style={{ background:"rgba(30,41,59,0.8)", borderRadius:6, height:8 }}>
+        <div style={{ background:"rgba(226,232,240,0.9)", borderRadius:6, height:8 }}>
           <div style={{ width:`${Math.min(100,current.effectiveTaxRate * 3)}%`, background:taxColor(current.effectiveTaxRate), height:"100%", borderRadius:6, transition:"width 0.4s" }} />
         </div>
         <div style={{ color:"#334155", fontSize:10, marginTop:6, fontFamily:"DM Sans, sans-serif" }}>
@@ -711,17 +711,17 @@ function CTCCalc() {
       </div>
 
       {(bonus > 0 || esop > 0) && (
-        <div style={{ background:"rgba(10,16,30,0.8)", border:"1px solid rgba(245,158,11,0.2)", borderRadius:12, padding:"12px 16px", marginBottom:10 }}>
+        <div style={{ background:"rgba(248,250,252,0.85)", border:"1px solid rgba(245,158,11,0.2)", borderRadius:12, padding:"12px 16px", marginBottom:10 }}>
           <div style={{ color:"#fbbf24", fontSize:12, fontWeight:700, fontFamily:"Syne, sans-serif", marginBottom:6 }}>⚡ Bonus & ESOP Tax</div>
           {bonus > 0 && <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif", marginBottom:4 }}>Bonus taxed at your slab rate. TDS deducted by employer at payout.</div>}
           {esop > 0 && <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif" }}>ESOP: perquisite tax at exercise (FMV − strike price). Separate LTCG/STCG when you sell. <span style={{ color:"#6366f1" }}>Hold 12+ months for 10% LTCG.</span></div>}
         </div>
       )}
 
-      <div style={{ background:"rgba(10,16,30,0.8)", border:"1px solid rgba(99,102,241,0.2)", borderRadius:14, overflow:"hidden" }}>
+      <div style={{ background:"rgba(248,250,252,0.85)", border:"1px solid rgba(99,102,241,0.2)", borderRadius:14, overflow:"hidden" }}>
         <div onClick={() => setShowOptimiser(!showOptimiser)} style={{ padding:"14px 16px", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
           <div>
-            <div style={{ color:"#a5b4fc", fontSize:13, fontWeight:700, fontFamily:"Syne, sans-serif" }}>
+            <div style={{ color:"#4f46e5", fontSize:13, fontWeight:700, fontFamily:"Syne, sans-serif" }}>
               💡 Negotiation Optimiser {allApplied ? "✅" : ""}
             </div>
             <div style={{ color:"#334155", fontSize:11, marginTop:2, fontFamily:"DM Sans, sans-serif" }}>
@@ -734,28 +734,28 @@ function CTCCalc() {
         {showOptimiser && (
           <div style={{ padding:"0 16px 16px" }}>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:14 }}>
-              <div style={{ background:"rgba(30,41,59,0.6)", borderRadius:10, padding:"12px 10px", textAlign:"center" }}>
-                <div style={{ color:"#475569", fontSize:10, marginBottom:4, textTransform:"uppercase", letterSpacing:0.8, fontFamily:"DM Sans, sans-serif" }}>Current Monthly</div>
-                <div style={{ color:"#e2e8f0", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif" }}>{rupee(current.monthlyInHand)}</div>
-                <div style={{ color:"#475569", fontSize:10, marginTop:3, fontFamily:"DM Sans, sans-serif" }}>{current.effectiveTaxRate.toFixed(1)}% tax</div>
+              <div style={{ background:"rgba(226,232,240,0.9)", borderRadius:10, padding:"12px 10px", textAlign:"center" }}>
+                <div style={{ color:"#64748b", fontSize:10, marginBottom:4, textTransform:"uppercase", letterSpacing:0.8, fontFamily:"DM Sans, sans-serif" }}>Current Monthly</div>
+                <div style={{ color:"#1e293b", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif" }}>{rupee(current.monthlyInHand)}</div>
+                <div style={{ color:"#64748b", fontSize:10, marginTop:3, fontFamily:"DM Sans, sans-serif" }}>{current.effectiveTaxRate.toFixed(1)}% tax</div>
               </div>
               <div style={{ background:"linear-gradient(135deg,rgba(99,102,241,0.14),rgba(139,92,246,0.07))", border:"1px solid rgba(99,102,241,0.25)", borderRadius:10, padding:"12px 10px", textAlign:"center" }}>
-                <div style={{ color:"#a5b4fc", fontSize:10, marginBottom:4, textTransform:"uppercase", letterSpacing:0.8, fontFamily:"DM Sans, sans-serif" }}>Fully Optimised</div>
-                <div style={{ color:"#818cf8", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif" }}>{rupee(optimised.monthlyInHand)}</div>
-                <div style={{ color:"#475569", fontSize:10, marginTop:3, fontFamily:"DM Sans, sans-serif" }}>{optimised.effectiveTaxRate.toFixed(1)}% tax</div>
+                <div style={{ color:"#4f46e5", fontSize:10, marginBottom:4, textTransform:"uppercase", letterSpacing:0.8, fontFamily:"DM Sans, sans-serif" }}>Fully Optimised</div>
+                <div style={{ color:"#4338ca", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif" }}>{rupee(optimised.monthlyInHand)}</div>
+                <div style={{ color:"#64748b", fontSize:10, marginTop:3, fontFamily:"DM Sans, sans-serif" }}>{optimised.effectiveTaxRate.toFixed(1)}% tax</div>
               </div>
             </div>
 
             {tips.map(({ applied, label, desc, action }) => (
-              <div key={label} style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, marginBottom:8, padding:"10px 12px", background: applied ? "rgba(6,12,24,0.6)" : "rgba(15,23,42,0.7)", borderRadius:10, border:`1px solid ${applied ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.08)"}`, opacity: applied ? 0.5 : 1 }}>
+              <div key={label} style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, marginBottom:8, padding:"10px 12px", background: applied ? "rgba(248,250,252,0.9)" : "rgba(255,255,255,0.75)", borderRadius:10, border:`1px solid ${applied ? "rgba(15,23,42,0.06)" : "rgba(15,23,42,0.06)"}`, opacity: applied ? 0.5 : 1 }}>
                 <div style={{ flex:1 }}>
-                  <div style={{ color: applied ? "#334155" : "#e2e8f0", fontSize:12, fontWeight:600, fontFamily:"DM Sans, sans-serif", marginBottom:2, textDecoration: applied ? "line-through" : "none" }}>{label}</div>
+                  <div style={{ color: applied ? "#334155" : "#1e293b", fontSize:12, fontWeight:600, fontFamily:"DM Sans, sans-serif", marginBottom:2, textDecoration: applied ? "line-through" : "none" }}>{label}</div>
                   <div style={{ color:"#334155", fontSize:11, fontFamily:"DM Sans, sans-serif" }}>{desc}</div>
                 </div>
                 <button onClick={action} disabled={applied} style={{
                   flexShrink:0, padding:"5px 12px", borderRadius:8, border:"none",
                   cursor: applied ? "default" : "pointer",
-                  background: applied ? "rgba(30,41,59,0.6)" : "linear-gradient(135deg,#6366f1,#8b5cf6)",
+                  background: applied ? "rgba(226,232,240,0.9)" : "linear-gradient(135deg,#6366f1,#8b5cf6)",
                   color: applied ? "#334155" : "#fff",
                   fontSize:11, fontWeight:700, fontFamily:"Syne, sans-serif", whiteSpace:"nowrap",
                   transition:"all 0.2s",
@@ -802,10 +802,10 @@ function PPFCalc() {
 
   return (
     <div>
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", background:"rgba(10,16,30,0.8)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:12, padding:"10px 14px", marginBottom:20 }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", background:"rgba(248,250,252,0.85)", border:"1px solid rgba(15,23,42,0.06)", borderRadius:12, padding:"10px 14px", marginBottom:20 }}>
         <div>
           <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif" }}>Current PPF Rate (Govt. Fixed)</div>
-          <div style={{ color:"#475569", fontSize:11, fontFamily:"DM Sans, sans-serif", marginTop:2 }}>Reviewed quarterly · Tax-free · EEE status</div>
+          <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif", marginTop:2 }}>Reviewed quarterly · Tax-free · EEE status</div>
         </div>
         <div style={{ color:"#00d09c", fontSize:22, fontWeight:800, fontFamily:"Syne, sans-serif" }}>7.1%</div>
       </div>
@@ -817,9 +817,9 @@ function PPFCalc() {
       <div style={{ color:"#334155", fontSize:11, fontFamily:"DM Sans, sans-serif", marginTop:-14, marginBottom:18 }}>Minimum 15 yrs · Extendable in 5-yr blocks after maturity</div>
 
       <div style={{ background:"linear-gradient(135deg,rgba(0,208,156,0.12),rgba(0,179,134,0.06))", border:"1px solid rgba(0,208,156,0.22)", borderRadius:16, padding:"20px 16px", textAlign:"center", marginBottom:10 }}>
-        <div style={{ color:"#6ee7b7", fontSize:11, textTransform:"uppercase", letterSpacing:1, fontFamily:"DM Sans, sans-serif", marginBottom:4 }}>Maturity Value ({years} years)</div>
+        <div style={{ color:"#059669", fontSize:11, textTransform:"uppercase", letterSpacing:1, fontFamily:"DM Sans, sans-serif", marginBottom:4 }}>Maturity Value ({years} years)</div>
         <div key={rupee(maturity)} style={{ color:"#00d09c", fontSize:34, fontWeight:800, fontFamily:"Syne, sans-serif", lineHeight:1, animation:"pmNumPop 0.4s cubic-bezier(0.34,1.56,0.64,1)" }}>{rupee(maturity)}</div>
-        <div style={{ color:"#475569", fontSize:11, marginTop:6, fontFamily:"DM Sans, sans-serif" }}>100% tax-free · No LTCG · No wealth tax</div>
+        <div style={{ color:"#64748b", fontSize:11, marginTop:6, fontFamily:"DM Sans, sans-serif" }}>100% tax-free · No LTCG · No wealth tax</div>
       </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:8 }}>
@@ -831,11 +831,11 @@ function PPFCalc() {
 
       <GrowthBar invested={totalInvested} returns={interest} />
 
-      <div style={{ background:"rgba(10,16,30,0.8)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:14, padding:"14px 16px", marginTop:12 }}>
-        <div style={{ color:"#e2e8f0", fontSize:13, fontWeight:700, fontFamily:"Syne, sans-serif", marginBottom:12 }}>🔄 Extension Scenarios</div>
-        <div style={{ color:"#475569", fontSize:11, fontFamily:"DM Sans, sans-serif", marginBottom:12 }}>PPF can be extended in 5-year blocks after maturity</div>
+      <div style={{ background:"rgba(248,250,252,0.85)", border:"1px solid rgba(15,23,42,0.06)", borderRadius:14, padding:"14px 16px", marginTop:12 }}>
+        <div style={{ color:"#1e293b", fontSize:13, fontWeight:700, fontFamily:"Syne, sans-serif", marginBottom:12 }}>🔄 Extension Scenarios</div>
+        <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif", marginBottom:12 }}>PPF can be extended in 5-year blocks after maturity</div>
         {[[`${years} yrs (Maturity)`, maturity, "#00d09c"],[`${years+5} yrs (+5 ext)`, ext5, "#3b82f6"],[`${years+10} yrs (+10 ext)`, ext10, "#8b5cf6"]].map(([label, val, color]) => (
-          <div key={label} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 0", borderBottom:"1px solid rgba(255,255,255,0.04)" }}>
+          <div key={label} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 0", borderBottom:"1px solid rgba(15,23,42,0.06)" }}>
             <span style={{ color:"#64748b", fontSize:12, fontFamily:"DM Sans, sans-serif" }}>{label}</span>
             <span style={{ color, fontWeight:700, fontSize:14, fontFamily:"Syne, sans-serif" }}>{rupee(val)}</span>
           </div>
@@ -843,11 +843,11 @@ function PPFCalc() {
       </div>
 
       <div style={{ background:"linear-gradient(135deg,rgba(99,102,241,0.1),rgba(139,92,246,0.06))", border:"1px solid rgba(99,102,241,0.2)", borderRadius:12, padding:"12px 14px", marginTop:10 }}>
-        <div style={{ color:"#a5b4fc", fontSize:12, fontWeight:700, fontFamily:"Syne, sans-serif", marginBottom:6 }}>💜 EEE Tax Status — Triple Exempt</div>
+        <div style={{ color:"#4f46e5", fontSize:12, fontWeight:700, fontFamily:"Syne, sans-serif", marginBottom:6 }}>💜 EEE Tax Status — Triple Exempt</div>
         {[["Invest","Deposits qualify under 80C (old regime)"],["Earn","Interest is fully tax-free every year"],["Withdraw","Maturity amount 100% tax-free"]].map(([stage,desc]) => (
           <div key={stage} style={{ display:"flex", gap:8, marginBottom:4 }}>
             <span style={{ color:"#6366f1", fontSize:11, fontWeight:700, fontFamily:"Syne, sans-serif", width:50, flexShrink:0 }}>{stage}</span>
-            <span style={{ color:"#475569", fontSize:11, fontFamily:"DM Sans, sans-serif" }}>{desc}</span>
+            <span style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif" }}>{desc}</span>
           </div>
         ))}
       </div>
@@ -879,22 +879,22 @@ function EmailModal({ onClose, subject, body, source }) {
   };
 
   return (
-    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:100, display:"flex", alignItems:"flex-end" }}
+    <div style={{ position:"fixed", inset:0, background:"rgba(15,23,42,0.45)", zIndex:100, display:"flex", alignItems:"flex-end" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div style={{ background:"rgba(8,14,28,0.97)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderRadius:"24px 24px 0 0", padding:"28px 24px 40px", width:"100%", border:"1px solid rgba(255,255,255,0.08)", animation:"pmModalUp 0.32s cubic-bezier(0.32,0.72,0,1)" }}>
+      <div style={{ background:"rgba(255,255,255,0.97)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderRadius:"24px 24px 0 0", padding:"28px 24px 40px", width:"100%", border:"1px solid rgba(15,23,42,0.06)", animation:"pmModalUp 0.32s cubic-bezier(0.32,0.72,0,1)" }}>
         {status === "done" ? (
           <div style={{ textAlign:"center", padding:"16px 0" }}>
             <div style={{ fontSize:40, marginBottom:12 }}>✅</div>
-            <div style={{ color:"#f1f5f9", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif", marginBottom:8 }}>Check your inbox!</div>
-            <div style={{ color:"#475569", fontSize:13, fontFamily:"DM Sans, sans-serif", marginBottom:24 }}>Your calculation has been sent to {email}</div>
+            <div style={{ color:"#0f172a", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif", marginBottom:8 }}>Check your inbox!</div>
+            <div style={{ color:"#64748b", fontSize:13, fontFamily:"DM Sans, sans-serif", marginBottom:24 }}>Your calculation has been sent to {email}</div>
             <button onClick={onClose} style={{ background:"linear-gradient(135deg,#00d09c,#00b386)", color:"#fff", border:"none", borderRadius:12, padding:"12px 32px", fontSize:14, fontWeight:700, fontFamily:"Syne, sans-serif", cursor:"pointer" }}>Done</button>
           </div>
         ) : (<>
-          <div style={{ color:"#f1f5f9", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif", marginBottom:4 }}>Email this calculation</div>
-          <div style={{ color:"#475569", fontSize:13, fontFamily:"DM Sans, sans-serif", marginBottom:20 }}>We'll send your results + save you a spot for new calculators.</div>
+          <div style={{ color:"#0f172a", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif", marginBottom:4 }}>Email this calculation</div>
+          <div style={{ color:"#64748b", fontSize:13, fontFamily:"DM Sans, sans-serif", marginBottom:20 }}>We'll send your results + save you a spot for new calculators.</div>
           <input ref={inputRef} type="email" placeholder="your@email.com" value={email}
             onChange={(e) => { setEmail(e.target.value); setMsg(""); }}
-            style={{ width:"100%", background:"rgba(10,16,30,0.9)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:12, padding:"14px 16px", color:"#f1f5f9", fontSize:14, fontFamily:"DM Sans, sans-serif", outline:"none", boxSizing:"border-box", marginBottom:12 }}
+            style={{ width:"100%", background:"rgba(248,250,252,0.85)", border:"1px solid rgba(15,23,42,0.06)", borderRadius:12, padding:"14px 16px", color:"#0f172a", fontSize:14, fontFamily:"DM Sans, sans-serif", outline:"none", boxSizing:"border-box", marginBottom:12 }}
           />
           {msg && <div style={{ color:"#f97316", fontSize:12, fontFamily:"DM Sans, sans-serif", marginBottom:10 }}>{msg}</div>}
           <button onClick={handleSubmit} disabled={status === "sending"} style={{ width:"100%", padding:"14px", borderRadius:12, border:"none", cursor: status === "sending" ? "wait" : "pointer", background:"linear-gradient(135deg,#00d09c,#00b386)", color:"#fff", fontSize:15, fontWeight:700, fontFamily:"Syne, sans-serif", opacity: status === "sending" ? 0.7 : 1 }}>
@@ -929,22 +929,22 @@ function NotifyModal({ onClose }) {
   };
 
   return (
-    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.75)", zIndex:100, display:"flex", alignItems:"flex-end" }}
+    <div style={{ position:"fixed", inset:0, background:"rgba(15,23,42,0.45)", zIndex:100, display:"flex", alignItems:"flex-end" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div style={{ background:"rgba(8,14,28,0.97)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderRadius:"24px 24px 0 0", padding:"28px 24px 40px", width:"100%", border:"1px solid rgba(255,255,255,0.08)", animation:"pmModalUp 0.32s cubic-bezier(0.32,0.72,0,1)" }}>
+      <div style={{ background:"rgba(255,255,255,0.97)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderRadius:"24px 24px 0 0", padding:"28px 24px 40px", width:"100%", border:"1px solid rgba(15,23,42,0.06)", animation:"pmModalUp 0.32s cubic-bezier(0.32,0.72,0,1)" }}>
         {status === "done" ? (
           <div style={{ textAlign:"center", padding:"16px 0" }}>
             <div style={{ fontSize:40, marginBottom:12 }}>🎉</div>
-            <div style={{ color:"#f1f5f9", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif", marginBottom:8 }}>You're on the list!</div>
-            <div style={{ color:"#475569", fontSize:13, fontFamily:"DM Sans, sans-serif", marginBottom:24 }}>We'll notify you when new calculators drop.</div>
+            <div style={{ color:"#0f172a", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif", marginBottom:8 }}>You're on the list!</div>
+            <div style={{ color:"#64748b", fontSize:13, fontFamily:"DM Sans, sans-serif", marginBottom:24 }}>We'll notify you when new calculators drop.</div>
             <button onClick={onClose} style={{ background:"linear-gradient(135deg,#3b82f6,#6366f1)", color:"#fff", border:"none", borderRadius:12, padding:"12px 32px", fontSize:14, fontWeight:700, fontFamily:"Syne, sans-serif", cursor:"pointer" }}>Done</button>
           </div>
         ) : (<>
-          <div style={{ color:"#f1f5f9", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif", marginBottom:4 }}>Get notified 🔔</div>
-          <div style={{ color:"#475569", fontSize:13, fontFamily:"DM Sans, sans-serif", marginBottom:20 }}>Tax regime, NPS, Rent vs Buy and more — be first to know.</div>
+          <div style={{ color:"#0f172a", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif", marginBottom:4 }}>Get notified 🔔</div>
+          <div style={{ color:"#64748b", fontSize:13, fontFamily:"DM Sans, sans-serif", marginBottom:20 }}>Tax regime, NPS, Rent vs Buy and more — be first to know.</div>
           <input ref={inputRef} type="email" placeholder="your@email.com" value={email}
             onChange={(e) => { setEmail(e.target.value); setMsg(""); }}
-            style={{ width:"100%", background:"rgba(10,16,30,0.9)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:12, padding:"14px 16px", color:"#f1f5f9", fontSize:14, fontFamily:"DM Sans, sans-serif", outline:"none", boxSizing:"border-box", marginBottom:12 }}
+            style={{ width:"100%", background:"rgba(248,250,252,0.85)", border:"1px solid rgba(15,23,42,0.06)", borderRadius:12, padding:"14px 16px", color:"#0f172a", fontSize:14, fontFamily:"DM Sans, sans-serif", outline:"none", boxSizing:"border-box", marginBottom:12 }}
           />
           {msg && <div style={{ color:"#f97316", fontSize:12, fontFamily:"DM Sans, sans-serif", marginBottom:10 }}>{msg}</div>}
           <button onClick={handleSubmit} disabled={status === "sending"} style={{ width:"100%", padding:"14px", borderRadius:12, border:"none", cursor: status === "sending" ? "wait" : "pointer", background:"linear-gradient(135deg,#3b82f6,#6366f1)", color:"#fff", fontSize:15, fontWeight:700, fontFamily:"Syne, sans-serif", opacity: status === "sending" ? 0.7 : 1 }}>
@@ -972,10 +972,10 @@ function AffiliateNudge({ calcId }) {
   if (!aff) return null;
   return (
     <a href={aff.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none", display:"block", marginTop:14 }}>
-      <div style={{ background:"rgba(15,23,42,0.75)", backdropFilter:"blur(8px)", WebkitBackdropFilter:"blur(8px)", border:"1px solid rgba(255,255,255,0.07)", borderRadius:14, padding:"14px 16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+      <div style={{ background:"rgba(255,255,255,0.75)", backdropFilter:"blur(8px)", WebkitBackdropFilter:"blur(8px)", border:"1px solid rgba(15,23,42,0.06)", borderRadius:14, padding:"14px 16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <div>
           <div style={{ color:"#334155", fontSize:10, fontFamily:"DM Sans, sans-serif", textTransform:"uppercase", letterSpacing:0.8, marginBottom:3 }}>Sponsored</div>
-          <div style={{ color:"#cbd5e1", fontSize:13, fontWeight:600, fontFamily:"DM Sans, sans-serif" }}>{aff.label}</div>
+          <div style={{ color:"#334155", fontSize:13, fontWeight:600, fontFamily:"DM Sans, sans-serif" }}>{aff.label}</div>
         </div>
         <div style={{ background:"linear-gradient(135deg,#00d09c,#00b386)", color:"#fff", padding:"7px 12px", borderRadius:10, fontSize:11, fontWeight:700, fontFamily:"Syne, sans-serif", whiteSpace:"nowrap", marginLeft:10 }}>{aff.cta}</div>
       </div>
@@ -998,9 +998,9 @@ function DisclaimerBar({ calcId }) {
   const text = DISCLAIMERS[calcId];
   if (!text) return null;
   return (
-    <div style={{ marginTop:14, background:"rgba(6,12,24,0.9)", border:"1px solid rgba(245,158,11,0.18)", borderRadius:12, padding:"12px 14px" }}>
+    <div style={{ marginTop:14, background:"rgba(248,250,252,0.9)", border:"1px solid rgba(245,158,11,0.18)", borderRadius:12, padding:"12px 14px" }}>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8 }}>
-        <div style={{ color:"#94a3b8", fontSize:11, fontFamily:"DM Sans, sans-serif", lineHeight:1.5, flex:1 }}>
+        <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif", lineHeight:1.5, flex:1 }}>
           ⚠️ {expanded ? text : text.slice(0,80) + (text.length > 80 ? "…" : "")}
         </div>
         {text.length > 80 && (
@@ -1018,7 +1018,7 @@ function DisclaimerBar({ calcId }) {
 
 function AdSlot({ position = "inline" }) {
   return (
-    <div style={{ margin:"14px 0", background:"rgba(6,12,24,0.6)", border:"1px dashed rgba(30,41,59,0.8)", borderRadius:12, padding:"14px", textAlign:"center", minHeight: position === "banner" ? 90 : 60, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:4 }}>
+    <div style={{ margin:"14px 0", background:"rgba(248,250,252,0.9)", border:"1px dashed rgba(226,232,240,0.9)", borderRadius:12, padding:"14px", textAlign:"center", minHeight: position === "banner" ? 90 : 60, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:4 }}>
       <div style={{ color:"#1e293b", fontSize:10, fontFamily:"DM Sans, sans-serif" }}>Ad</div>
       <div style={{ color:"#1e293b", fontSize:9, fontFamily:"DM Sans, sans-serif" }}>media.net slot — activate after approval</div>
     </div>
@@ -1028,23 +1028,23 @@ function AdSlot({ position = "inline" }) {
 // ── Global disclaimer modal ───────────────────────────────────────────────────
 function GlobalDisclaimer({ onAccept }) {
   return (
-    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.8)", zIndex:200, display:"flex", alignItems:"flex-end" }}>
-      <div style={{ background:"rgba(8,14,28,0.98)", backdropFilter:"blur(28px)", WebkitBackdropFilter:"blur(28px)", borderRadius:"24px 24px 0 0", padding:"28px 24px 40px", width:"100%", border:"1px solid rgba(255,255,255,0.08)", boxSizing:"border-box", animation:"pmModalUp 0.4s cubic-bezier(0.32,0.72,0,1)" }}>
+    <div style={{ position:"fixed", inset:0, background:"rgba(15,23,42,0.5)", zIndex:200, display:"flex", alignItems:"flex-end" }}>
+      <div style={{ background:"rgba(255,255,255,0.97)", backdropFilter:"blur(28px)", WebkitBackdropFilter:"blur(28px)", borderRadius:"24px 24px 0 0", padding:"28px 24px 40px", width:"100%", border:"1px solid rgba(15,23,42,0.06)", boxSizing:"border-box", animation:"pmModalUp 0.4s cubic-bezier(0.32,0.72,0,1)" }}>
         <div style={{ fontSize:32, textAlign:"center", marginBottom:12 }}>📊</div>
-        <div style={{ color:"#f1f5f9", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif", marginBottom:10, textAlign:"center" }}>For Reference Only</div>
+        <div style={{ color:"#0f172a", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif", marginBottom:10, textAlign:"center" }}>For Reference Only</div>
         <div style={{ color:"#64748b", fontSize:13, fontFamily:"DM Sans, sans-serif", lineHeight:1.6, marginBottom:8 }}>
-          PaisaMarg calculators provide <strong style={{ color:"#e2e8f0" }}>indicative estimates</strong> for educational purposes only.
+          PaisaMarg calculators provide <strong style={{ color:"#1e293b" }}>indicative estimates</strong> for educational purposes only.
         </div>
-        <div style={{ color:"#475569", fontSize:12, fontFamily:"DM Sans, sans-serif", lineHeight:1.6, marginBottom:20 }}>
+        <div style={{ color:"#64748b", fontSize:12, fontFamily:"DM Sans, sans-serif", lineHeight:1.6, marginBottom:20 }}>
           Results are based on inputs and assumed rates — they do not constitute financial, tax, or investment advice. Market returns are not guaranteed. Tax calculations may vary based on your individual circumstances.
           <br /><br />
           Always consult a <strong style={{ color:"#64748b" }}>qualified CA</strong> or <strong style={{ color:"#64748b" }}>SEBI-registered investment advisor</strong> before making financial decisions.
         </div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
           {[["🏦","Not a bank or broker"],["📈","Returns are assumptions"],["💼","Not a CA or advisor"],["⚖️","Not legal/tax advice"]].map(([icon,text]) => (
-            <div key={text} style={{ background:"rgba(15,23,42,0.8)", borderRadius:10, padding:"10px 12px", display:"flex", alignItems:"center", gap:8 }}>
+            <div key={text} style={{ background:"rgba(255,255,255,0.75)", borderRadius:10, padding:"10px 12px", display:"flex", alignItems:"center", gap:8 }}>
               <span style={{ fontSize:16 }}>{icon}</span>
-              <span style={{ color:"#475569", fontSize:11, fontFamily:"DM Sans, sans-serif" }}>{text}</span>
+              <span style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif" }}>{text}</span>
             </div>
           ))}
         </div>
@@ -1092,10 +1092,10 @@ function HomeScreen({ onSelect }) {
 
         {/* Headline */}
         <div style={{ fontFamily:"Syne, sans-serif", lineHeight:1.1, marginBottom:10 }}>
-          <div style={{ color:"#f1f5f9", fontSize:33, fontWeight:800 }}>Your money,</div>
+          <div style={{ color:"#0f172a", fontSize:33, fontWeight:800 }}>Your money,</div>
           <span className="pm-shine" style={{ fontSize:33, fontWeight:800, display:"block" }}>calculated.</span>
         </div>
-        <div style={{ color:"#475569", fontSize:13, fontFamily:"DM Sans, sans-serif", lineHeight:1.6 }}>
+        <div style={{ color:"#64748b", fontSize:13, fontFamily:"DM Sans, sans-serif", lineHeight:1.6 }}>
           Smart tools to plan, borrow and invest smarter
         </div>
       </div>
@@ -1105,9 +1105,9 @@ function HomeScreen({ onSelect }) {
         {CATEGORIES.map(c => (
           <button key={c.id} onClick={() => setCat(c.id)} style={{
             flexShrink:0, padding:"7px 16px", borderRadius:20, border:"none", cursor:"pointer",
-            background: cat === c.id ? "linear-gradient(135deg,#00d09c,#00b386)" : "rgba(20,30,50,0.75)",
+            background: cat === c.id ? "linear-gradient(135deg,#00d09c,#00b386)" : "rgba(241,245,249,0.85)",
             backdropFilter:"blur(8px)", WebkitBackdropFilter:"blur(8px)",
-            color: cat === c.id ? "#fff" : "#475569",
+            color: cat === c.id ? "#fff" : "#64748b",
             fontSize:12, fontWeight:700, fontFamily:"Syne, sans-serif", transition:"all 0.2s",
             boxShadow: cat === c.id ? "0 4px 16px rgba(0,208,156,0.3)" : "none",
           }}>{c.icon} {c.label}</button>
@@ -1122,14 +1122,14 @@ function HomeScreen({ onSelect }) {
             onClick={() => onSelect(calc.id)}
             className="pm-card"
             style={{
-              background:"rgba(10,18,34,0.78)",
+              background:"rgba(255,255,255,0.82)",
               backdropFilter:"blur(16px)", WebkitBackdropFilter:"blur(16px)",
-              border:"1px solid rgba(255,255,255,0.07)",
+              border:"1px solid rgba(15,23,42,0.06)",
               borderRadius:20, padding:"18px 15px",
               textAlign:"left", cursor:"pointer",
               display:"flex", flexDirection:"column",
               minHeight:172,
-              boxShadow:"0 4px 20px rgba(0,0,0,0.4)",
+              boxShadow:"0 4px 20px rgba(15,23,42,0.12)",
               animation:`pmCardIn 0.4s ease-out ${i * 0.07}s both`,
               position:"relative", overflow:"hidden",
             }}
@@ -1142,7 +1142,7 @@ function HomeScreen({ onSelect }) {
               {calc.icon}
             </div>
 
-            <div style={{ color:"#e2e8f0", fontSize:13, fontWeight:700, fontFamily:"Syne, sans-serif", lineHeight:1.3, marginBottom:5 }}>
+            <div style={{ color:"#1e293b", fontSize:13, fontWeight:700, fontFamily:"Syne, sans-serif", lineHeight:1.3, marginBottom:5 }}>
               {calc.label}
             </div>
             <div style={{ color:"#334155", fontSize:11, fontFamily:"DM Sans, sans-serif", lineHeight:1.45, flex:1 }}>
@@ -1160,8 +1160,8 @@ function HomeScreen({ onSelect }) {
       {/* Coming soon teaser */}
       <div style={{ margin:"16px 20px 0", background:"rgba(59,130,246,0.07)", backdropFilter:"blur(8px)", WebkitBackdropFilter:"blur(8px)", border:"1px solid rgba(59,130,246,0.14)", borderRadius:16, padding:"14px 16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <div>
-          <div style={{ color:"#e2e8f0", fontSize:13, fontWeight:600, fontFamily:"Syne, sans-serif" }}>More calculators coming</div>
-          <div style={{ color:"#475569", fontSize:11, marginTop:2, fontFamily:"DM Sans, sans-serif" }}>Tax regime, NPS, Rent vs Buy & more</div>
+          <div style={{ color:"#1e293b", fontSize:13, fontWeight:600, fontFamily:"Syne, sans-serif" }}>More calculators coming</div>
+          <div style={{ color:"#64748b", fontSize:11, marginTop:2, fontFamily:"DM Sans, sans-serif" }}>Tax regime, NPS, Rent vs Buy & more</div>
         </div>
         <button onClick={() => setShowNotify(true)} style={{ background:"linear-gradient(135deg,#3b82f6,#6366f1)", color:"#fff", padding:"8px 14px", borderRadius:10, fontSize:12, fontWeight:700, fontFamily:"Syne, sans-serif", cursor:"pointer", border:"none", boxShadow:"0 4px 14px rgba(99,102,241,0.28)", flexShrink:0 }}>
           Notify Me
@@ -1176,9 +1176,290 @@ function HomeScreen({ onSelect }) {
 }
 
 // ── Main App ──────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════
+// INFO PAGES — About / Contact / Privacy / Disclaimer + Footer
+// ════════════════════════════════════════════════════════════════════════
+const CONTACT_EMAIL = "hello@paisamarg.in";
+const LAST_UPDATED = "June 2026";
+
+// ── Shared page shell ─────────────────────────────────────────────────────────
+function InfoPageShell({ title, subtitle, children }) {
+  return (
+    <div style={{ padding:"24px 20px 60px", maxWidth:680, margin:"0 auto" }}>
+      <div style={{ color:"#0f172a", fontSize:26, fontWeight:800, fontFamily:"Syne, sans-serif", lineHeight:1.2 }}>{title}</div>
+      {subtitle && <div style={{ color:"#64748b", fontSize:14, marginTop:8, fontFamily:"DM Sans, sans-serif", lineHeight:1.6 }}>{subtitle}</div>}
+      <div style={{ marginTop:24 }}>{children}</div>
+    </div>
+  );
+}
+
+function InfoSection({ heading, children }) {
+  return (
+    <div style={{ marginBottom:26 }}>
+      {heading && <div style={{ color:"#0f172a", fontSize:16, fontWeight:700, fontFamily:"Syne, sans-serif", marginBottom:10 }}>{heading}</div>}
+      <div style={{ color:"#475569", fontSize:14, fontFamily:"DM Sans, sans-serif", lineHeight:1.7 }}>{children}</div>
+    </div>
+  );
+}
+
+// ── ABOUT ─────────────────────────────────────────────────────────────────────
+function AboutPage() {
+  return (
+    <InfoPageShell
+      title="About PaisaMarg"
+      subtitle="Clear, honest money tools — built for India."
+    >
+      <InfoSection>
+        PaisaMarg is a free collection of personal finance calculators designed
+        specifically for Indian users. Whether you're working out the EMI on a
+        home loan, projecting how a SIP could grow, planning your retirement
+        number, or figuring out your real take-home salary, PaisaMarg gives you
+        clear answers in seconds — no sign-up, no jargon, no cost.
+      </InfoSection>
+
+      <InfoSection heading="Why we built it">
+        Most financial calculators are either buried inside a bank's website,
+        cluttered with upsells, or built for a different country's tax rules.
+        PaisaMarg focuses on the numbers that matter to Indians — PPF, the new
+        tax regime, CTC structuring, FIRE planning — and presents them simply,
+        on any device.
+      </InfoSection>
+
+      <InfoSection heading="How our calculators work">
+        Every calculator uses standard, widely-accepted financial formulas —
+        the same compound interest, EMI, and tax-slab maths used across the
+        industry. We show our assumptions clearly so you always understand what
+        drives the result. Where rates are set by the government (like PPF), we
+        use the current published figure and note when it was last reviewed.
+      </InfoSection>
+
+      <InfoSection heading="What PaisaMarg is not">
+        PaisaMarg is an educational tool, not a financial advisor. We are not a
+        bank, broker, or registered investment adviser. Our results are
+        indicative estimates to help you think — not personalised advice. For
+        decisions that matter, always consult a qualified CA or a
+        SEBI-registered investment adviser.
+      </InfoSection>
+
+      <InfoSection heading="Stay in touch">
+        We're always adding new calculators. If you have a suggestion, spot an
+        error, or just want to say hello, email us at{" "}
+        <a href={`mailto:${CONTACT_EMAIL}`} style={{ color:"#00b386", fontWeight:600, textDecoration:"none" }}>{CONTACT_EMAIL}</a>.
+      </InfoSection>
+    </InfoPageShell>
+  );
+}
+
+// ── CONTACT ───────────────────────────────────────────────────────────────────
+function ContactPage() {
+  return (
+    <InfoPageShell
+      title="Contact Us"
+      subtitle="We'd love to hear from you."
+    >
+      <InfoSection>
+        Have a question, a calculator suggestion, found a bug, or want to discuss
+        a partnership? Reach us by email and we'll get back to you as soon as we can.
+      </InfoSection>
+
+      <a href={`mailto:${CONTACT_EMAIL}`} style={{ textDecoration:"none", display:"block" }}>
+        <div style={{
+          background:"linear-gradient(135deg,rgba(0,208,156,0.1),rgba(0,179,134,0.05))",
+          border:"1px solid rgba(0,208,156,0.25)", borderRadius:16, padding:"20px",
+          display:"flex", alignItems:"center", gap:14,
+        }}>
+          <div style={{ width:46, height:46, borderRadius:12, background:"rgba(0,208,156,0.14)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0 }}>📧</div>
+          <div>
+            <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif", textTransform:"uppercase", letterSpacing:0.8 }}>Email us</div>
+            <div style={{ color:"#00b386", fontSize:16, fontWeight:700, fontFamily:"Syne, sans-serif", marginTop:2 }}>{CONTACT_EMAIL}</div>
+          </div>
+        </div>
+      </a>
+
+      <InfoSection heading="Response time">
+        We're a small operation, so please allow a few working days for a reply.
+        For corrections to a calculation, it helps if you tell us which calculator
+        and the inputs you used.
+      </InfoSection>
+    </InfoPageShell>
+  );
+}
+
+// ── PRIVACY POLICY ────────────────────────────────────────────────────────────
+function PrivacyPage() {
+  return (
+    <InfoPageShell
+      title="Privacy Policy"
+      subtitle={`Last updated: ${LAST_UPDATED}`}
+    >
+      <InfoSection>
+        This Privacy Policy explains what information PaisaMarg ("we", "us",
+        "the site") collects when you use paisamarg.in, how we use it, and the
+        choices you have. By using the site, you agree to the practices described here.
+      </InfoSection>
+
+      <InfoSection heading="Information we collect">
+        <strong>Email addresses you give us.</strong> If you choose to email
+        yourself a calculation or sign up to be notified about new calculators,
+        we store the email address you enter, along with which feature you used
+        and the date. You provide this voluntarily — the calculators work fully
+        without it.
+        <br /><br />
+        <strong>Calculator inputs.</strong> The numbers you type into a
+        calculator are processed in your browser to show results. We do not store
+        the figures you enter on our servers.
+        <br /><br />
+        <strong>Automatically collected data.</strong> Like most websites, our
+        hosting and analytics tools may collect standard technical information
+        such as your browser type, device, approximate region, and pages visited.
+        This helps us understand usage and improve the site.
+      </InfoSection>
+
+      <InfoSection heading="Cookies and similar technologies">
+        We may use cookies and similar technologies for basic site functionality,
+        to remember preferences (such as dismissing the disclaimer notice), and to
+        measure traffic. Advertising partners (see below) may also set cookies.
+        You can control or delete cookies through your browser settings; some
+        features may not work as well if you disable them.
+      </InfoSection>
+
+      <InfoSection heading="Advertising">
+        We may display advertisements served by third-party advertising networks,
+        including Media.net and its partners. These networks may use cookies, web
+        beacons, or similar technologies to serve ads based on your prior visits
+        to this and other websites, and to measure ad performance. We do not share
+        the email addresses you give us with advertising networks. You can learn
+        about opting out of personalised advertising at sites such as
+        youronlinechoices.com or the Network Advertising Initiative.
+      </InfoSection>
+
+      <InfoSection heading="Analytics">
+        We may use analytics services to understand how visitors use the site in
+        aggregate. These services may collect information such as pages viewed and
+        general location, and may use cookies. The data is used to improve the
+        site, not to identify you personally.
+      </InfoSection>
+
+      <InfoSection heading="How we use your information">
+        We use the information we collect to: provide and improve the calculators;
+        send you a calculation or new-calculator notification if you requested one;
+        understand site usage; display and measure advertising; and keep the site
+        secure. We do not sell your personal information.
+      </InfoSection>
+
+      <InfoSection heading="Data sharing">
+        We share data only with the service providers that help us run the site —
+        for example our hosting provider, database provider, analytics, and
+        advertising partners — and only as needed for those services. We may also
+        disclose information if required by law.
+      </InfoSection>
+
+      <InfoSection heading="Data retention and your rights">
+        We keep the email addresses you provide until you ask us to remove them.
+        You can request access to, correction of, or deletion of the personal
+        information we hold about you at any time by emailing{" "}
+        <a href={`mailto:${CONTACT_EMAIL}`} style={{ color:"#00b386", fontWeight:600, textDecoration:"none" }}>{CONTACT_EMAIL}</a>.
+      </InfoSection>
+
+      <InfoSection heading="Children">
+        PaisaMarg is intended for adults making financial decisions and is not
+        directed at children under 13. We do not knowingly collect personal
+        information from children.
+      </InfoSection>
+
+      <InfoSection heading="Changes to this policy">
+        We may update this policy from time to time. When we do, we'll revise the
+        "Last updated" date at the top of this page.
+      </InfoSection>
+
+      <InfoSection heading="Contact">
+        Questions about this policy? Email{" "}
+        <a href={`mailto:${CONTACT_EMAIL}`} style={{ color:"#00b386", fontWeight:600, textDecoration:"none" }}>{CONTACT_EMAIL}</a>.
+      </InfoSection>
+    </InfoPageShell>
+  );
+}
+
+// ── DISCLAIMER ────────────────────────────────────────────────────────────────
+function DisclaimerPage() {
+  return (
+    <InfoPageShell
+      title="Disclaimer"
+      subtitle={`Last updated: ${LAST_UPDATED}`}
+    >
+      <InfoSection heading="For reference only">
+        All calculators and content on PaisaMarg are provided for general
+        informational and educational purposes only. They produce indicative
+        estimates based on the inputs you provide and standard financial formulas.
+        They do not constitute financial, investment, tax, legal, or accounting advice.
+      </InfoSection>
+
+      <InfoSection heading="Not a substitute for professional advice">
+        PaisaMarg is not a bank, broker, financial institution, or
+        SEBI-registered investment adviser. Nothing on this site should be taken
+        as a recommendation to buy, sell, or hold any financial product. Before
+        making any financial decision, you should consult a qualified Chartered
+        Accountant (CA) or a SEBI-registered investment adviser who can consider
+        your individual circumstances.
+      </InfoSection>
+
+      <InfoSection heading="No guarantee of accuracy">
+        While we work to keep our formulas and rates correct and up to date,
+        we make no warranty that results are accurate, complete, or current.
+        Interest rates, tax rules, and government scheme terms change over time.
+        Market-linked returns are assumptions, not guarantees — past performance
+        does not indicate future results.
+      </InfoSection>
+
+      <InfoSection heading="Third-party links and ads">
+        This site may contain advertisements and links to third-party websites,
+        including affiliate links. We are not responsible for the content,
+        products, or services of those third parties. A link or ad does not imply
+        our endorsement. If you click an affiliate link and take an action, we may
+        earn a commission at no extra cost to you.
+      </InfoSection>
+
+      <InfoSection heading="Limitation of liability">
+        To the fullest extent permitted by law, PaisaMarg and its operators accept
+        no liability for any loss or damage arising from your use of, or reliance
+        on, the calculators or content on this site. You use the site at your own
+        risk and are solely responsible for your financial decisions.
+      </InfoSection>
+    </InfoPageShell>
+  );
+}
+
+// ── FOOTER (with links to the info pages) ─────────────────────────────────────
+function SiteFooter({ onNavigate }) {
+  const links = [
+    ["about", "About"],
+    ["contact", "Contact"],
+    ["privacy", "Privacy Policy"],
+    ["disclaimer", "Disclaimer"],
+  ];
+  return (
+    <div style={{ borderTop:"1px solid rgba(15,23,42,0.07)", marginTop:8, padding:"24px 20px 36px", textAlign:"center" }}>
+      <div style={{ display:"flex", flexWrap:"wrap", gap:"10px 20px", justifyContent:"center", marginBottom:16 }}>
+        {links.map(([id, label]) => (
+          <button key={id} onClick={() => onNavigate(id)} style={{
+            background:"none", border:"none", cursor:"pointer",
+            color:"#64748b", fontSize:13, fontWeight:600, fontFamily:"DM Sans, sans-serif", padding:0,
+          }}>{label}</button>
+        ))}
+      </div>
+      <div style={{ color:"#94a3b8", fontSize:11, fontFamily:"DM Sans, sans-serif", lineHeight:1.6 }}>
+        PaisaMarg provides indicative estimates for educational purposes only — not financial advice.
+        <br />
+        © {new Date().getFullYear()} PaisaMarg · Made in India 🇮🇳
+      </div>
+    </div>
+  );
+}
+
 export default function PaisaMarg() {
   const [activeId, setActiveId] = useState(null);
   const [emailModal, setEmailModal] = useState(false);
+  const [view, setView] = useState(null); // null = app, or 'about'|'contact'|'privacy'|'disclaimer'
   const [showDisclaimer, setShowDisclaimer] = useState(() => {
     try {
       // Version stamp — bump this string any time you want all users to see the disclaimer again
@@ -1210,7 +1491,7 @@ export default function PaisaMarg() {
 
     // PWA meta tags
     const metas = [
-      { name:"theme-color",                      content:"#060c18" },
+      { name:"theme-color",                      content:"#f7f9fc" },
       { name:"mobile-web-app-capable",            content:"yes" },
       { name:"apple-mobile-web-app-capable",      content:"yes" },
       { name:"apple-mobile-web-app-status-bar-style", content:"black-translucent" },
@@ -1234,10 +1515,28 @@ export default function PaisaMarg() {
   const activeCalc = CALCULATORS.find(c => c.id === activeId);
   const CalcComponent = activeCalc?.component;
 
+  // Navigate to an info page (about/contact/privacy/disclaimer)
+  const goToPage = (pageId) => {
+    setView(pageId);
+    setActiveId(null);
+    setEmailModal(false);
+    try { window.scrollTo(0, 0); } catch {}
+  };
+  // Return to the calculator app home
+  const goHome = () => {
+    setView(null);
+    setActiveId(null);
+    setEmailModal(false);
+    try { window.scrollTo(0, 0); } catch {}
+  };
+
+  const INFO_PAGES = { about: AboutPage, contact: ContactPage, privacy: PrivacyPage, disclaimer: DisclaimerPage };
+  const InfoComponent = view ? INFO_PAGES[view] : null;
+
   return (
     <div style={{
       minHeight:"100vh",
-      background:"#060c18",
+      background:"#f7f9fc",
       fontFamily:"DM Sans, sans-serif",
       position:"relative",
     }}>
@@ -1250,23 +1549,24 @@ export default function PaisaMarg() {
         {/* Sticky header */}
         <div style={{
           position:"sticky", top:0, zIndex:50,
-          background:"rgba(6,12,24,0.88)",
+          background:"rgba(248,250,252,0.9)",
           backdropFilter:"blur(18px)", WebkitBackdropFilter:"blur(18px)",
-          borderBottom:"1px solid rgba(255,255,255,0.05)",
+          borderBottom:"1px solid rgba(15,23,42,0.06)",
+          boxShadow:"0 1px 12px rgba(15,23,42,0.04)",
           padding:"14px 20px",
           display:"flex", alignItems:"center", gap:10,
         }}>
-          {activeId && (
-            <button onClick={() => { setActiveId(null); setEmailModal(false); }} style={{
-              background:"rgba(20,30,50,0.8)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:10,
+          {(activeId || view) && (
+            <button onClick={goHome} style={{
+              background:"rgba(241,245,249,0.85)", border:"1px solid rgba(15,23,42,0.06)", borderRadius:10,
               width:34, height:34, cursor:"pointer", color:"#64748b",
               fontSize:16, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0,
             }}>←</button>
           )}
-          <div style={{ display:"flex", alignItems:"center", gap:8, flex:1 }}>
+          <div onClick={goHome} style={{ display:"flex", alignItems:"center", gap:8, flex:1, cursor:"pointer" }}>
             <div style={{ width:30, height:30, borderRadius:8, background:"linear-gradient(135deg,#00d09c,#3b82f6)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:15, flexShrink:0, boxShadow:"0 0 18px rgba(0,208,156,0.28)" }}>₹</div>
             <div>
-              <div style={{ color:"#f1f5f9", fontSize:17, fontWeight:800, fontFamily:"Syne, sans-serif", lineHeight:1 }}>PaisaMarg</div>
+              <div style={{ color:"#0f172a", fontSize:17, fontWeight:800, fontFamily:"Syne, sans-serif", lineHeight:1 }}>PaisaMarg</div>
               {activeId && <div style={{ color:"#334155", fontSize:10, fontFamily:"DM Sans, sans-serif" }}>{activeCalc?.label}</div>}
             </div>
           </div>
@@ -1276,8 +1576,10 @@ export default function PaisaMarg() {
         {showDisclaimer && <GlobalDisclaimer onAccept={acceptDisclaimer} />}
 
         {/* Screen transition — key changes on navigation, re-triggers animation */}
-        <div key={activeId ?? "home"} style={{ animation:"pmSlideUp 0.28s ease-out" }}>
-          {!activeId ? (
+        <div key={view ?? activeId ?? "home"} style={{ animation:"pmSlideUp 0.28s ease-out" }}>
+          {view ? (
+            <InfoComponent />
+          ) : !activeId ? (
             <HomeScreen onSelect={setActiveId} />
           ) : (
             <div style={{ padding:"16px 20px 40px" }}>
@@ -1293,28 +1595,28 @@ export default function PaisaMarg() {
               {/* Calculator title + email button */}
               <div style={{ marginBottom:20, display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
                 <div>
-                  <div style={{ color:"#f1f5f9", fontSize:20, fontWeight:800, fontFamily:"Syne, sans-serif" }}>{activeCalc?.label}</div>
+                  <div style={{ color:"#0f172a", fontSize:20, fontWeight:800, fontFamily:"Syne, sans-serif" }}>{activeCalc?.label}</div>
                   <div style={{ color:"#334155", fontSize:12, marginTop:3, fontFamily:"DM Sans, sans-serif" }}>{activeCalc?.tagline}</div>
                 </div>
                 <button onClick={() => setEmailModal(true)} style={{
                   flexShrink:0,
-                  background:"rgba(20,30,50,0.8)",
+                  background:"rgba(241,245,249,0.85)",
                   backdropFilter:"blur(8px)", WebkitBackdropFilter:"blur(8px)",
-                  border:"1px solid rgba(255,255,255,0.07)",
+                  border:"1px solid rgba(15,23,42,0.06)",
                   borderRadius:10, padding:"8px 12px", cursor:"pointer", color:"#64748b",
                   fontSize:11, fontWeight:700, fontFamily:"Syne, sans-serif",
                   display:"flex", alignItems:"center", gap:5, marginLeft:10,
                 }}>📧 Email</button>
               </div>
 
-              {/* Calculator card — glassmorphism */}
+              {/* Calculator card — frosted white */}
               <div style={{
-                background:"rgba(10,18,34,0.82)",
+                background:"rgba(255,255,255,0.88)",
                 backdropFilter:"blur(22px)", WebkitBackdropFilter:"blur(22px)",
                 borderRadius:22,
-                border:"1px solid rgba(255,255,255,0.07)",
+                border:"1px solid rgba(15,23,42,0.07)",
                 padding:"22px 18px",
-                boxShadow:"0 24px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)",
+                boxShadow:"0 12px 40px rgba(15,23,42,0.1), inset 0 1px 0 rgba(255,255,255,0.9)",
               }}>
                 {CalcComponent && <CalcComponent />}
               </div>
@@ -1325,6 +1627,9 @@ export default function PaisaMarg() {
             </div>
           )}
         </div>
+
+        {/* Footer — always visible, links to info pages */}
+        <SiteFooter onNavigate={goToPage} />
       </div>
     </div>
   );
