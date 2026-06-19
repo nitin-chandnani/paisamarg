@@ -855,6 +855,113 @@ function PPFCalc() {
   );
 }
 
+// ── Income Tax Calculator (Old vs New Regime, FY2025-26) ─────────────────────
+function IncomeTaxCalc() {
+  const [income, setIncome] = useState(1500000);   // gross annual salary income
+  const [ded80C, setDed80C] = useState(150000);    // 80C investments (max 1.5L)
+  const [ded80D, setDed80D] = useState(25000);     // health insurance
+  const [hra, setHra] = useState(0);               // HRA exemption claimed
+
+  // ── New Regime FY2025-26 ──
+  // Slabs: 0–4L nil, 4–8L 5%, 8–12L 10%, 12–16L 15%, 16–20L 20%, 20–24L 25%, >24L 30%
+  // Std deduction 75,000. Rebate 87A: full rebate if taxable ≤ 12L (up to ₹60,000).
+  const newStdDed = 75000;
+  const newTaxable = Math.max(0, income - newStdDed);
+  const newSlabTax = (() => {
+    let t = 0;
+    [[400000,800000,0.05],[800000,1200000,0.10],[1200000,1600000,0.15],
+     [1600000,2000000,0.20],[2000000,2400000,0.25],[2400000,Infinity,0.30]]
+      .forEach(([lo,hi,r]) => { if (newTaxable > lo) t += (Math.min(newTaxable,hi) - lo) * r; });
+    return t;
+  })();
+  // 87A rebate — taxable income up to 12L pays zero
+  const newRebate = newTaxable <= 1200000 ? newSlabTax : 0;
+  const newTaxAfterRebate = Math.max(0, newSlabTax - newRebate);
+  const newCess = newTaxAfterRebate * 0.04;
+  const newTotalTax = newTaxAfterRebate + newCess;
+
+  // ── Old Regime ──
+  // Slabs: 0–2.5L nil, 2.5–5L 5%, 5–10L 20%, >10L 30%
+  // Std deduction 50,000. Deductions: 80C (max 1.5L), 80D, HRA. Rebate 87A if taxable ≤ 5L.
+  const oldStdDed = 50000;
+  const oldDeductions = Math.min(ded80C, 150000) + ded80D + hra;
+  const oldTaxable = Math.max(0, income - oldStdDed - oldDeductions);
+  const oldSlabTax = (() => {
+    let t = 0;
+    [[250000,500000,0.05],[500000,1000000,0.20],[1000000,Infinity,0.30]]
+      .forEach(([lo,hi,r]) => { if (oldTaxable > lo) t += (Math.min(oldTaxable,hi) - lo) * r; });
+    return t;
+  })();
+  const oldRebate = oldTaxable <= 500000 ? oldSlabTax : 0;
+  const oldTaxAfterRebate = Math.max(0, oldSlabTax - oldRebate);
+  const oldCess = oldTaxAfterRebate * 0.04;
+  const oldTotalTax = oldTaxAfterRebate + oldCess;
+
+  // ── Winner ──
+  const saving = Math.abs(newTotalTax - oldTotalTax);
+  const newWins = newTotalTax <= oldTotalTax;
+  const winnerLabel = newWins ? "New Regime" : "Old Regime";
+  const winnerColor = "#00d09c";
+
+  // Regime comparison card
+  const RegimeCard = ({ title, taxable, totalTax, isWinner, accent }) => (
+    <div style={{
+      background: isWinner ? "linear-gradient(135deg,rgba(0,208,156,0.12),rgba(0,179,134,0.06))" : "rgba(255,255,255,0.75)",
+      border:`1px solid ${isWinner ? "rgba(0,208,156,0.3)" : "rgba(15,23,42,0.07)"}`,
+      borderRadius:14, padding:"16px 14px", textAlign:"center", position:"relative",
+    }}>
+      {isWinner && (
+        <div style={{ position:"absolute", top:-9, left:"50%", transform:"translateX(-50%)", background:"linear-gradient(135deg,#00d09c,#00b386)", color:"#fff", fontSize:9, fontWeight:800, fontFamily:"Syne, sans-serif", padding:"3px 10px", borderRadius:10, textTransform:"uppercase", letterSpacing:0.5, whiteSpace:"nowrap" }}>✓ Best for you</div>
+      )}
+      <div style={{ color:"#64748b", fontSize:11, marginBottom:8, marginTop: isWinner ? 4 : 0, fontFamily:"DM Sans, sans-serif", textTransform:"uppercase", letterSpacing:0.8 }}>{title}</div>
+      <div key={totalTax} style={{ color: isWinner ? "#00b386" : "#1e293b", fontSize:22, fontWeight:800, fontFamily:"Syne, sans-serif", lineHeight:1.1, animation:"pmNumPop 0.38s cubic-bezier(0.34,1.56,0.64,1)" }}>{rupee(totalTax)}</div>
+      <div style={{ color:"#94a3b8", fontSize:10, marginTop:4, fontFamily:"DM Sans, sans-serif" }}>tax on {rupee(taxable)} taxable</div>
+    </div>
+  );
+
+  return (
+    <div>
+      <Slider label="Annual Income (Gross Salary)" value={income} min={300000} max={10000000} step={50000} onChange={setIncome} display={rupee(income)} />
+
+      {/* Old-regime deductions */}
+      <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif", marginBottom:10, marginTop:4, textTransform:"uppercase", letterSpacing:0.8 }}>
+        Deductions (used by Old Regime only)
+      </div>
+      <Slider label="80C — PF, ELSS, LIC, PPF…" value={ded80C} min={0} max={150000} step={5000} onChange={setDed80C} display={ded80C > 0 ? rupee(ded80C) : "None"} />
+      <Slider label="80D — Health Insurance" value={ded80D} min={0} max={100000} step={5000} onChange={setDed80D} display={ded80D > 0 ? rupee(ded80D) : "None"} />
+      <Slider label="HRA Exemption" value={hra} min={0} max={500000} step={10000} onChange={setHra} display={hra > 0 ? rupee(hra) : "None"} />
+
+      {/* Winner hero */}
+      <div style={{ background:"linear-gradient(135deg,rgba(0,208,156,0.12),rgba(0,179,134,0.06))", border:"1px solid rgba(0,208,156,0.25)", borderRadius:16, padding:"18px 16px", textAlign:"center", margin:"18px 0 14px" }}>
+        <div style={{ color:"#059669", fontSize:11, textTransform:"uppercase", letterSpacing:1, fontFamily:"DM Sans, sans-serif", marginBottom:4 }}>You Save With</div>
+        <div key={winnerLabel} style={{ color:"#00b386", fontSize:26, fontWeight:800, fontFamily:"Syne, sans-serif", lineHeight:1.1, animation:"pmNumPop 0.4s cubic-bezier(0.34,1.56,0.64,1)" }}>{winnerLabel}</div>
+        <div style={{ color:"#64748b", fontSize:12, marginTop:6, fontFamily:"DM Sans, sans-serif" }}>
+          {saving < 1 ? "Both regimes cost the same" : `Saves you ${rupee(saving)} per year`}
+        </div>
+      </div>
+
+      {/* Side-by-side */}
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+        <RegimeCard title="New Regime" taxable={newTaxable} totalTax={newTotalTax} isWinner={newWins} />
+        <RegimeCard title="Old Regime" taxable={oldTaxable} totalTax={oldTotalTax} isWinner={!newWins} />
+      </div>
+
+      {/* Breakdown stats */}
+      <StatRow label="New regime taxable income" value={rupee(newTaxable)} color="#00b386" />
+      <StatRow label="Old regime taxable income" value={rupee(oldTaxable)} color="#6366f1" />
+      <StatRow label="Old regime total deductions" value={rupee(oldStdDed + oldDeductions)} color="#f59e0b" />
+
+      {/* Helper note */}
+      <div style={{ background:"rgba(99,102,241,0.06)", border:"1px solid rgba(99,102,241,0.15)", borderRadius:12, padding:"12px 14px", marginTop:12 }}>
+        <div style={{ color:"#4f46e5", fontSize:12, fontWeight:700, fontFamily:"Syne, sans-serif", marginBottom:5 }}>💡 Quick guide</div>
+        <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif", lineHeight:1.6 }}>
+          The <strong>New Regime</strong> has lower rates but no deductions — best if you don't invest much. The <strong>Old Regime</strong> rewards 80C/80D/HRA — best if you claim a lot. Under the new regime, income up to ₹12L is effectively tax-free.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Email Capture Modal ───────────────────────────────────────────────────────
 function EmailModal({ onClose, subject, body, source }) {
   const [email, setEmail] = useState("");
@@ -965,6 +1072,7 @@ const AFFILIATES = {
   ppf:  { label:"Open PPF — SBI / Post Office", url:"https://www.onlinesbi.sbi/?ref=paisamarg", cta:"Open Account →" },
   fire: { label:"Start retirement SIP on Coin", url:"https://coin.zerodha.com/?ref=paisamarg", cta:"Invest on Zerodha →" },
   ctc:  { label:"Find higher-paying roles", url:"https://www.naukri.com/?ref=paisamarg", cta:"Browse Jobs →" },
+  tax:  { label:"File your taxes online", url:"https://cleartax.in/?ref=paisamarg", cta:"File ITR →" },
 };
 
 function AffiliateNudge({ calcId }) {
@@ -991,6 +1099,7 @@ const DISCLAIMERS = {
   ppf:  "PPF interest rate is set by the Government of India and reviewed quarterly. The 7.1% rate is current as of FY2025-26 and may change. Partial withdrawal rules apply after year 6.",
   fire: "Retirement projections are illustrative estimates based on assumed inflation and return rates. Actual outcomes will vary. This is not a financial plan. Consult a SEBI-registered investment advisor.",
   ctc:  "Tax calculations are indicative under the New Tax Regime FY2025-26. Actual liability depends on your specific salary structure, exemptions, and employer TDS. Consult a qualified CA for exact figures.",
+  tax:  "Tax estimates are indicative for FY2025-26 (AY2026-27) and assume a salaried individual below 60. Surcharge for high incomes, marginal relief, and other deductions are simplified. Consult a qualified CA for exact figures.",
 };
 
 function DisclaimerBar({ calcId }) {
@@ -1065,6 +1174,7 @@ const CALCULATORS = [
   { id:"ppf",  label:"PPF Calculator",  icon:"💜", tagline:"Tax-free 7.1% — the gold standard",    category:"invest", color:"#8b5cf6", component:PPFCalc  },
   { id:"fire", label:"FIRE Planner",    icon:"🔥", tagline:"Find your retirement number",          category:"plan",   color:"#f97316", component:FIRECalc },
   { id:"ctc",  label:"Salary / CTC",    icon:"💼", tagline:"Negotiate smarter, take home more",    category:"plan",   color:"#6366f1", component:CTCCalc  },
+  { id:"tax",  label:"Income Tax",      icon:"🧾", tagline:"Old vs New regime — find your winner", category:"plan",   color:"#ef4444", component:IncomeTaxCalc },
 ];
 
 const CATEGORIES = [
@@ -1105,6 +1215,10 @@ const SEO = {
   ctc: {
     title: "Salary Calculator — CTC to In-Hand (New Tax Regime) | PaisaMarg",
     description: "Convert your CTC to monthly in-hand salary under the new tax regime FY2025-26. See tax, PF, and optimise your structure.",
+  },
+  tax: {
+    title: "Income Tax Calculator — Old vs New Regime FY2025-26 | PaisaMarg",
+    description: "Compare old vs new tax regime side by side for FY2025-26. See which regime saves you more tax with 80C, 80D and HRA deductions.",
   },
   about:      { title: "About PaisaMarg — Money Tools for India", description: "Learn about PaisaMarg, free personal finance calculators built for Indian users." },
   contact:    { title: "Contact PaisaMarg", description: "Get in touch with the PaisaMarg team." },
