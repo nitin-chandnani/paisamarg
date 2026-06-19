@@ -962,6 +962,162 @@ function IncomeTaxCalc() {
   );
 }
 
+// ── Home Loan Prepayment Calculator ──────────────────────────────────────────
+function PrepaymentCalc() {
+  const [mode, setMode] = useState("lump");      // "lump" | "monthly"
+  const [loan, setLoan] = useState(5000000);
+  const [rate, setRate] = useState(8.5);
+  const [tenure, setTenure] = useState(20);
+  const [lumpSum, setLumpSum] = useState(500000);    // one-time prepayment
+  const [afterYears, setAfterYears] = useState(3);   // when the lump sum is made
+  const [extraMonthly, setExtraMonthly] = useState(5000); // extra every month
+
+  const mr = rate / 12 / 100;
+  const n = tenure * 12;
+  const emi = loan * mr * Math.pow(1 + mr, n) / (Math.pow(1 + mr, n) - 1);
+
+  // Baseline (no prepayment)
+  const baseTotalInterest = emi * n - loan;
+
+  // Simulate month-by-month with prepayment
+  const simulate = () => {
+    let balance = loan;
+    let totalInterest = 0;
+    let months = 0;
+    const lumpAtMonth = afterYears * 12;
+    while (balance > 0 && months < n * 2) {
+      const interest = balance * mr;
+      let principal = emi - interest;
+      // add extra monthly prepayment
+      if (mode === "monthly") principal += extraMonthly;
+      // add one-time lump sum at the chosen month
+      if (mode === "lump" && months === lumpAtMonth) balance -= lumpSum;
+      balance -= principal;
+      totalInterest += interest;
+      months++;
+      if (balance < 0) { totalInterest += balance * 0; balance = 0; }
+    }
+    return { totalInterest, months };
+  };
+
+  const { totalInterest: newInterest, months: newMonths } = simulate();
+  const interestSaved = Math.max(0, baseTotalInterest - newInterest);
+  const monthsSaved = Math.max(0, n - newMonths);
+  const yearsSaved = Math.floor(monthsSaved / 12);
+  const remMonthsSaved = monthsSaved % 12;
+  const newYears = Math.floor(newMonths / 12);
+  const newRemMonths = newMonths % 12;
+
+  return (
+    <div>
+      {/* Mode toggle */}
+      <div style={{ display:"flex", gap:8, marginBottom:22 }}>
+        {[["lump","One-time Lump Sum"],["monthly","Extra Every Month"]].map(([m,lbl]) => (
+          <button key={m} onClick={() => setMode(m)} style={{
+            flex:1, padding:"10px 6px", borderRadius:12, border:"none", cursor:"pointer",
+            background: mode === m ? "linear-gradient(135deg,#3b82f6,#2563eb)" : "rgba(226,232,240,0.9)",
+            color: mode === m ? "#fff" : "#64748b", fontWeight:700, fontSize:13,
+            fontFamily:"Syne, sans-serif", transition:"all 0.2s",
+            boxShadow: mode === m ? "0 4px 16px rgba(59,130,246,0.28)" : "none",
+          }}>{lbl}</button>
+        ))}
+      </div>
+
+      <Slider label="Loan Amount" value={loan} min={100000} max={100000000} step={100000} onChange={setLoan} display={rupee(loan)} />
+      <Slider label="Interest Rate (p.a.)" value={rate} min={5} max={20} step={0.1} onChange={setRate} display={`${rate}%`} />
+      <Slider label="Original Tenure" value={tenure} min={1} max={30} step={1} onChange={setTenure} display={`${tenure} yrs`} />
+
+      {mode === "lump" ? (<>
+        <Slider label="Prepayment Amount" value={lumpSum} min={50000} max={20000000} step={50000} onChange={setLumpSum} display={rupee(lumpSum)} />
+        <Slider label="Prepay After" value={afterYears} min={0} max={tenure - 1} step={1} onChange={setAfterYears} display={afterYears === 0 ? "Immediately" : `${afterYears} yrs`} />
+      </>) : (
+        <Slider label="Extra Payment / Month" value={extraMonthly} min={1000} max={200000} step={1000} onChange={setExtraMonthly} display={rupee(extraMonthly)} />
+      )}
+
+      {/* Hero — interest saved */}
+      <div style={{ background:"linear-gradient(135deg,rgba(0,208,156,0.12),rgba(0,179,134,0.06))", border:"1px solid rgba(0,208,156,0.25)", borderRadius:16, padding:"20px 16px", textAlign:"center", margin:"18px 0 10px" }}>
+        <div style={{ color:"#059669", fontSize:11, textTransform:"uppercase", letterSpacing:1, fontFamily:"DM Sans, sans-serif", marginBottom:4 }}>Total Interest Saved</div>
+        <div key={interestSaved} style={{ color:"#00b386", fontSize:32, fontWeight:800, fontFamily:"Syne, sans-serif", lineHeight:1, animation:"pmNumPop 0.4s cubic-bezier(0.34,1.56,0.64,1)" }}>{rupee(interestSaved)}</div>
+        <div style={{ color:"#64748b", fontSize:12, marginTop:6, fontFamily:"DM Sans, sans-serif" }}>
+          {monthsSaved > 0 ? `Loan ends ${yearsSaved > 0 ? `${yearsSaved} yr${yearsSaved>1?"s":""} ` : ""}${remMonthsSaved > 0 ? `${remMonthsSaved} mo` : ""} earlier` : "No tenure change"}
+        </div>
+      </div>
+
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:8 }}>
+        <ResultCard label="Monthly EMI" value={rupee(emi)} accent />
+        <ResultCard label="Interest Saved" value={rupee(interestSaved)} accent />
+        <ResultCard label="New Loan Tenure" value={`${newYears}y ${newRemMonths}m`} />
+        <ResultCard label="Time Saved" value={`${yearsSaved}y ${remMonthsSaved}m`} />
+      </div>
+
+      <StatRow label="Interest without prepayment" value={rupee(baseTotalInterest)} color="#f97316" />
+      <StatRow label="Interest with prepayment" value={rupee(newInterest)} color="#00b386" />
+
+      <div style={{ background:"rgba(59,130,246,0.06)", border:"1px solid rgba(59,130,246,0.15)", borderRadius:12, padding:"12px 14px", marginTop:12 }}>
+        <div style={{ color:"#2563eb", fontSize:12, fontWeight:700, fontFamily:"Syne, sans-serif", marginBottom:5 }}>💡 Prepay vs Invest</div>
+        <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif", lineHeight:1.6 }}>
+          Prepaying guarantees a saving equal to your loan rate ({rate}%). If you can earn more than {rate}% after tax by investing instead, investing may win. Prepaying early in the loan saves the most interest.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Credit Card EMI / Debt Calculator ────────────────────────────────────────
+function CreditCardEMICalc() {
+  const [amount, setAmount] = useState(100000);
+  const [rate, setRate] = useState(16);      // annual interest rate on card EMI
+  const [months, setMonths] = useState(12);
+  const [processingFee, setProcessingFee] = useState(1);  // % one-time
+
+  const mr = rate / 12 / 100;
+  const emi = mr > 0
+    ? amount * mr * Math.pow(1 + mr, months) / (Math.pow(1 + mr, months) - 1)
+    : amount / months;
+  const totalPayment = emi * months;
+  const interestPaid = totalPayment - amount;
+  const feeAmount = amount * (processingFee / 100);
+  const feeWithGST = feeAmount * 1.18;            // 18% GST on processing fee
+  const gstOnInterest = interestPaid * 0.18;      // 18% GST on interest component
+  const trueCost = interestPaid + feeWithGST + gstOnInterest;
+  const trueCostPct = (trueCost / amount) * 100;
+
+  return (
+    <div>
+      <Slider label="Purchase / Amount" value={amount} min={5000} max={2000000} step={5000} onChange={setAmount} display={rupee(amount)} />
+      <Slider label="Interest Rate (p.a.)" value={rate} min={0} max={36} step={0.5} onChange={setRate} display={rate === 0 ? "0% (No Cost)" : `${rate}%`} />
+      <Slider label="Tenure" value={months} min={3} max={36} step={1} onChange={setMonths} display={`${months} mo`} />
+      <Slider label="Processing Fee" value={processingFee} min={0} max={3} step={0.25} onChange={setProcessingFee} display={processingFee === 0 ? "None" : `${processingFee}%`} />
+
+      {/* Hero — true cost */}
+      <div style={{ background:"linear-gradient(135deg,rgba(239,68,68,0.1),rgba(249,115,22,0.05))", border:"1px solid rgba(239,68,68,0.22)", borderRadius:16, padding:"20px 16px", textAlign:"center", margin:"18px 0 10px" }}>
+        <div style={{ color:"#dc2626", fontSize:11, textTransform:"uppercase", letterSpacing:1, fontFamily:"DM Sans, sans-serif", marginBottom:4 }}>True Extra Cost</div>
+        <div key={trueCost} style={{ color:"#dc2626", fontSize:32, fontWeight:800, fontFamily:"Syne, sans-serif", lineHeight:1, animation:"pmNumPop 0.4s cubic-bezier(0.34,1.56,0.64,1)" }}>{rupee(trueCost)}</div>
+        <div style={{ color:"#64748b", fontSize:12, marginTop:6, fontFamily:"DM Sans, sans-serif" }}>
+          {trueCostPct.toFixed(1)}% of your purchase — incl. GST
+        </div>
+      </div>
+
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:8 }}>
+        <ResultCard label="Monthly EMI" value={rupee(emi)} accent />
+        <ResultCard label="Total Payable" value={rupee(totalPayment + feeWithGST + gstOnInterest)} accent />
+        <ResultCard label="Interest" value={rupee(interestPaid)} />
+        <ResultCard label="GST (18%)" value={rupee(feeWithGST - feeAmount + gstOnInterest)} />
+      </div>
+
+      <StatRow label="Processing fee + GST" value={rupee(feeWithGST)} color="#f97316" />
+      <StatRow label="GST on interest" value={rupee(gstOnInterest)} color="#f97316" />
+
+      <div style={{ background:"rgba(239,68,68,0.06)", border:"1px solid rgba(239,68,68,0.15)", borderRadius:12, padding:"12px 14px", marginTop:12 }}>
+        <div style={{ color:"#dc2626", fontSize:12, fontWeight:700, fontFamily:"Syne, sans-serif", marginBottom:5 }}>⚠️ The hidden cost of "No Cost EMI"</div>
+        <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif", lineHeight:1.6 }}>
+          Even "no cost" EMIs usually carry an 18% GST on the interest the bank charges, plus a processing fee. Banks recover interest by removing the upfront discount. Always compare paying in full versus the EMI's true cost.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Email Capture Modal ───────────────────────────────────────────────────────
 function EmailModal({ onClose, subject, body, source }) {
   const [email, setEmail] = useState("");
@@ -1067,6 +1223,8 @@ function NotifyModal({ onClose }) {
 // ── Affiliate links ───────────────────────────────────────────────────────────
 const AFFILIATES = {
   emi:  { label:"Compare home loan rates", url:"https://www.paisabazaar.com/home-loan/?ref=paisamarg", cta:"Check Rates →" },
+  prepay: { label:"Refinance at a lower rate", url:"https://www.paisabazaar.com/home-loan/?ref=paisamarg", cta:"Compare Rates →" },
+  cardemi: { label:"Find a lower-interest personal loan", url:"https://www.paisabazaar.com/personal-loan/?ref=paisamarg", cta:"Check Loans →" },
   sip:  { label:"Start this SIP on Groww", url:"https://groww.in/?ref=paisamarg", cta:"Invest on Groww →" },
   fd:   { label:"Best FD rates right now", url:"https://www.bankbazaar.com/fixed-deposit.html?ref=paisamarg", cta:"Compare FDs →" },
   ppf:  { label:"Open PPF — SBI / Post Office", url:"https://www.onlinesbi.sbi/?ref=paisamarg", cta:"Open Account →" },
@@ -1094,6 +1252,8 @@ function AffiliateNudge({ calcId }) {
 // ── Disclaimers ───────────────────────────────────────────────────────────────
 const DISCLAIMERS = {
   emi:  "Actual EMI may vary based on lender processing fees, GST charges, and exact disbursement date. Rate shown is reducing balance. Consult your lender for a final amortisation schedule.",
+  prepay: "Prepayment savings are indicative and assume a fixed interest rate and no prepayment charges. Floating rates and lender prepayment rules vary. Check your loan agreement before prepaying.",
+  cardemi: "Estimates are indicative. Actual credit card EMI cost depends on your bank's interest rate, processing fee, GST treatment and any discount adjustments on No-Cost EMI. Check your bank's terms.",
   sip:  "Mutual fund investments are subject to market risks. Returns shown are based on assumed rates and are not guaranteed. Past performance is not indicative of future results. Read all scheme documents carefully.",
   fd:   "Interest rates vary by bank, tenure and deposit amount. Senior citizen rates may differ. TDS applicable on interest above ₹40,000/year (₹50,000 for seniors).",
   ppf:  "PPF interest rate is set by the Government of India and reviewed quarterly. The 7.1% rate is current as of FY2025-26 and may change. Partial withdrawal rules apply after year 6.",
@@ -1169,6 +1329,8 @@ function GlobalDisclaimer({ onAccept }) {
 // ── Calculator registry ───────────────────────────────────────────────────────
 const CALCULATORS = [
   { id:"emi",  label:"EMI Calculator",  icon:"🏠", tagline:"Know your EMI before you sign",         category:"borrow", color:"#3b82f6", component:EMICalc  },
+  { id:"prepay", label:"Loan Prepayment", icon:"⚡", tagline:"See how much interest you save",       category:"borrow", color:"#3b82f6", component:PrepaymentCalc },
+  { id:"cardemi", label:"Credit Card EMI", icon:"💳", tagline:"The real cost of No-Cost EMI",         category:"borrow", color:"#3b82f6", component:CreditCardEMICalc },
   { id:"sip",  label:"SIP & Lumpsum",   icon:"📈", tagline:"Watch your wealth compound",            category:"invest", color:"#00d09c", component:SIPCalc  },
   { id:"fd",   label:"FD / RD",         icon:"🏦", tagline:"Safe, steady, guaranteed",              category:"invest", color:"#00d09c", component:FDCalc   },
   { id:"ppf",  label:"PPF Calculator",  icon:"💜", tagline:"Tax-free 7.1% — the gold standard",    category:"invest", color:"#8b5cf6", component:PPFCalc  },
@@ -1195,6 +1357,14 @@ const SEO = {
   emi: {
     title: "EMI Calculator — Home, Car & Personal Loan EMI | PaisaMarg",
     description: "Calculate your monthly loan EMI instantly. See total interest, principal breakdown and amortisation for home, car and personal loans in India.",
+  },
+  prepay: {
+    title: "Home Loan Prepayment Calculator — Save Interest | PaisaMarg",
+    description: "See how much interest you save and how many years you cut by prepaying your home loan — lump sum or extra monthly. Free prepayment calculator for India.",
+  },
+  cardemi: {
+    title: "Credit Card EMI Calculator — True Cost of No-Cost EMI | PaisaMarg",
+    description: "Find the real cost of credit card EMIs including GST and processing fees. See what 'No-Cost EMI' actually costs you in India.",
   },
   sip: {
     title: "SIP Calculator — Mutual Fund SIP & Lumpsum Returns | PaisaMarg",
