@@ -1074,6 +1074,101 @@ const CATEGORIES = [
   { id:"plan",   label:"Plan",   icon:"🎯" },
 ];
 
+// ── SEO metadata — per calculator + info pages ────────────────────────────────
+const SITE_URL = "https://paisamarg.in";
+
+const SEO = {
+  home: {
+    title: "PaisaMarg — Free Personal Finance Calculators for India",
+    description: "Free, easy money calculators for India: EMI, SIP, FD/RD, PPF, FIRE retirement and salary/CTC. No signup. Instant results.",
+  },
+  emi: {
+    title: "EMI Calculator — Home, Car & Personal Loan EMI | PaisaMarg",
+    description: "Calculate your monthly loan EMI instantly. See total interest, principal breakdown and amortisation for home, car and personal loans in India.",
+  },
+  sip: {
+    title: "SIP Calculator — Mutual Fund SIP & Lumpsum Returns | PaisaMarg",
+    description: "Calculate SIP and lumpsum mutual fund returns. See future value, wealth gained and return multiple for your monthly investments.",
+  },
+  fd: {
+    title: "FD & RD Calculator — Fixed & Recurring Deposit Returns | PaisaMarg",
+    description: "Calculate Fixed Deposit (FD) and Recurring Deposit (RD) maturity value and interest earned with quarterly compounding.",
+  },
+  ppf: {
+    title: "PPF Calculator — Public Provident Fund Maturity | PaisaMarg",
+    description: "Calculate your PPF maturity value at the current 7.1% rate. See tax-free returns, extension scenarios and the EEE tax benefit.",
+  },
+  fire: {
+    title: "FIRE Calculator — Retirement Planning for India | PaisaMarg",
+    description: "Find your FIRE number and plan early retirement. Calculate the corpus you need and whether your savings will last.",
+  },
+  ctc: {
+    title: "Salary Calculator — CTC to In-Hand (New Tax Regime) | PaisaMarg",
+    description: "Convert your CTC to monthly in-hand salary under the new tax regime FY2025-26. See tax, PF, and optimise your structure.",
+  },
+  about:      { title: "About PaisaMarg — Money Tools for India", description: "Learn about PaisaMarg, free personal finance calculators built for Indian users." },
+  contact:    { title: "Contact PaisaMarg", description: "Get in touch with the PaisaMarg team." },
+  privacy:    { title: "Privacy Policy — PaisaMarg", description: "How PaisaMarg handles your data and privacy." },
+  disclaimer: { title: "Disclaimer — PaisaMarg", description: "Important information about using PaisaMarg calculators." },
+};
+
+// Apply title, meta description, canonical + JSON-LD for the current view
+function applySEO(key) {
+  const meta = SEO[key] || SEO.home;
+  try {
+    document.title = meta.title;
+
+    // Meta description
+    let desc = document.querySelector('meta[name="description"]');
+    if (!desc) { desc = document.createElement("meta"); desc.name = "description"; document.head.appendChild(desc); }
+    desc.content = meta.description;
+
+    // Canonical URL
+    const path = key === "home" ? "/" : `/${key}`;
+    let canon = document.querySelector('link[rel="canonical"]');
+    if (!canon) { canon = document.createElement("link"); canon.rel = "canonical"; document.head.appendChild(canon); }
+    canon.href = SITE_URL + path;
+
+    // Open Graph
+    const setOG = (prop, content) => {
+      let el = document.querySelector(`meta[property="${prop}"]`);
+      if (!el) { el = document.createElement("meta"); el.setAttribute("property", prop); document.head.appendChild(el); }
+      el.content = content;
+    };
+    setOG("og:title", meta.title);
+    setOG("og:description", meta.description);
+    setOG("og:url", SITE_URL + path);
+    setOG("og:type", "website");
+    setOG("og:site_name", "PaisaMarg");
+
+    // JSON-LD structured data — mark calculators as WebApplication
+    let ld = document.getElementById("pm-jsonld");
+    if (!ld) { ld = document.createElement("script"); ld.id = "pm-jsonld"; ld.type = "application/ld+json"; document.head.appendChild(ld); }
+    const calc = CALCULATORS.find(c => c.id === key);
+    ld.textContent = JSON.stringify(
+      calc
+        ? {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: meta.title.split(" | ")[0],
+            description: meta.description,
+            url: SITE_URL + path,
+            applicationCategory: "FinanceApplication",
+            operatingSystem: "Any",
+            offers: { "@type": "Offer", price: "0", priceCurrency: "INR" },
+            publisher: { "@type": "Organization", name: "PaisaMarg", url: SITE_URL },
+          }
+        : {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "PaisaMarg",
+            description: SEO.home.description,
+            url: SITE_URL,
+          }
+    );
+  } catch {}
+}
+
 // ── Home Screen ───────────────────────────────────────────────────────────────
 function HomeScreen({ onSelect }) {
   const [cat, setCat] = useState("all");
@@ -1457,9 +1552,22 @@ function SiteFooter({ onNavigate }) {
 }
 
 export default function PaisaMarg() {
-  const [activeId, setActiveId] = useState(null);
+  // Read initial route from URL path (e.g. /emi, /about) or ?calc= query
+  const readInitialRoute = () => {
+    try {
+      const path = window.location.pathname.replace(/^\/+|\/+$/g, "");
+      const query = new URLSearchParams(window.location.search).get("calc");
+      const id = path || query || "";
+      if (CALCULATORS.some(c => c.id === id)) return { activeId: id, view: null };
+      if (["about", "contact", "privacy", "disclaimer"].includes(id)) return { activeId: null, view: id };
+    } catch {}
+    return { activeId: null, view: null };
+  };
+  const initial = readInitialRoute();
+
+  const [activeId, setActiveId] = useState(initial.activeId);
   const [emailModal, setEmailModal] = useState(false);
-  const [view, setView] = useState(null); // null = app, or 'about'|'contact'|'privacy'|'disclaimer'
+  const [view, setView] = useState(initial.view); // null = app, or 'about'|'contact'|'privacy'|'disclaimer'
   const [showDisclaimer, setShowDisclaimer] = useState(() => {
     try {
       // Version stamp — bump this string any time you want all users to see the disclaimer again
@@ -1509,17 +1617,32 @@ export default function PaisaMarg() {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
     }
-    document.title = "PaisaMarg — Smart Money Calculators";
+    // Title/description handled dynamically by applySEO
   }, []);
 
   const activeCalc = CALCULATORS.find(c => c.id === activeId);
   const CalcComponent = activeCalc?.component;
+
+  // Push a clean URL without reloading the page
+  const pushURL = (path) => {
+    try { window.history.pushState({}, "", path); } catch {}
+  };
+
+  // Open a calculator
+  const openCalc = (id) => {
+    setView(null);
+    setActiveId(id);
+    setEmailModal(false);
+    pushURL(`/${id}`);
+    try { window.scrollTo(0, 0); } catch {}
+  };
 
   // Navigate to an info page (about/contact/privacy/disclaimer)
   const goToPage = (pageId) => {
     setView(pageId);
     setActiveId(null);
     setEmailModal(false);
+    pushURL(`/${pageId}`);
     try { window.scrollTo(0, 0); } catch {}
   };
   // Return to the calculator app home
@@ -1527,8 +1650,25 @@ export default function PaisaMarg() {
     setView(null);
     setActiveId(null);
     setEmailModal(false);
+    pushURL("/");
     try { window.scrollTo(0, 0); } catch {}
   };
+
+  // Keep SEO tags in sync with the current view
+  useEffect(() => {
+    applySEO(view || activeId || "home");
+  }, [view, activeId]);
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const onPop = () => {
+      const r = readInitialRoute();
+      setActiveId(r.activeId);
+      setView(r.view);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   const INFO_PAGES = { about: AboutPage, contact: ContactPage, privacy: PrivacyPage, disclaimer: DisclaimerPage };
   const InfoComponent = view ? INFO_PAGES[view] : null;
@@ -1580,7 +1720,7 @@ export default function PaisaMarg() {
           {view ? (
             <InfoComponent />
           ) : !activeId ? (
-            <HomeScreen onSelect={setActiveId} />
+            <HomeScreen onSelect={openCalc} />
           ) : (
             <div style={{ padding:"16px 20px 40px" }}>
               {emailModal && (
