@@ -901,10 +901,9 @@ function IncomeTaxCalc() {
   const saving = Math.abs(newTotalTax - oldTotalTax);
   const newWins = newTotalTax <= oldTotalTax;
   const winnerLabel = newWins ? "New Regime" : "Old Regime";
-  const winnerColor = "#00d09c";
 
   // Regime comparison card
-  const RegimeCard = ({ title, taxable, totalTax, isWinner, accent }) => (
+  const RegimeCard = ({ title, taxable, totalTax, isWinner }) => (
     <div style={{
       background: isWinner ? "linear-gradient(135deg,rgba(0,208,156,0.12),rgba(0,179,134,0.06))" : "rgba(255,255,255,0.75)",
       border:`1px solid ${isWinner ? "rgba(0,208,156,0.3)" : "rgba(15,23,42,0.07)"}`,
@@ -947,8 +946,9 @@ function IncomeTaxCalc() {
       </div>
 
       {/* Breakdown stats */}
-      <StatRow label="New regime taxable income" value={rupee(newTaxable)} color="#00b386" />
-      <StatRow label="Old regime taxable income" value={rupee(oldTaxable)} color="#6366f1" />
+      {/* Breakdown stats — winning regime shown in green, the other in neutral grey */}
+      <StatRow label="New regime taxable income" value={rupee(newTaxable)} color={newWins ? "#00b386" : "#64748b"} />
+      <StatRow label="Old regime taxable income" value={rupee(oldTaxable)} color={!newWins ? "#00b386" : "#64748b"} />
       <StatRow label="Old regime total deductions" value={rupee(oldStdDed + oldDeductions)} color="#f59e0b" />
 
       {/* Helper note */}
