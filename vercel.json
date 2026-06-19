@@ -1,5 +1,15 @@
 {
   "rewrites": [
-    { "source": "/((?!sitemap.xml|robots.txt|manifest.json|sw.js|favicon.svg|icons/.*|assets/.*).*)", "destination": "/index.html" }
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/emi", "destination": "/index.html" },
+    { "source": "/sip", "destination": "/index.html" },
+    { "source": "/fd", "destination": "/index.html" },
+    { "source": "/ppf", "destination": "/index.html" },
+    { "source": "/fire", "destination": "/index.html" },
+    { "source": "/ctc", "destination": "/index.html" },
+    { "source": "/about", "destination": "/index.html" },
+    { "source": "/contact", "destination": "/index.html" },
+    { "source": "/privacy", "destination": "/index.html" },
+    { "source": "/disclaimer", "destination": "/index.html" }
   ]
 }
