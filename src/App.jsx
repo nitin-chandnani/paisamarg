@@ -1901,6 +1901,20 @@ export default function PaisaMarg() {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
     }
+
+    // ── Google Analytics (gtag.js) ──
+    if (!window.gtag) {
+      const ga = document.createElement("script");
+      ga.async = true;
+      ga.src = "https://www.googletagmanager.com/gtag/js?id=G-Z6Z5J2R0KP";
+      document.head.appendChild(ga);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag("js", new Date());
+      // send_page_view:false — we send pageviews manually per calculator below
+      window.gtag("config", "G-Z6Z5J2R0KP", { send_page_view: false });
+    }
+
     // Title/description handled dynamically by applySEO
   }, []);
 
@@ -1940,7 +1954,17 @@ export default function PaisaMarg() {
 
   // Keep SEO tags in sync with the current view
   useEffect(() => {
-    applySEO(view || activeId || "home");
+    const key = view || activeId || "home";
+    applySEO(key);
+    // Send a Google Analytics pageview for this calculator/page
+    if (window.gtag) {
+      const path = key === "home" ? "/" : `/${key}`;
+      window.gtag("event", "page_view", {
+        page_path: path,
+        page_location: window.location.href,
+        page_title: document.title,
+      });
+    }
   }, [view, activeId]);
 
   // Handle browser back/forward buttons
