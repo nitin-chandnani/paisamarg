@@ -126,6 +126,26 @@ const fmtCr = (n) => {
 
 const rupee = (n) => `\u20B9${fmtCr(n)}`;
 
+// ── New Regime tax — Tax Year 2026-27 (Income-tax Act, 2025) ─────────────────
+// Slabs unchanged by Budget 2026: 0–4L nil, 4–8L 5%, 8–12L 10%, 12–16L 15%,
+// 16–20L 20%, 20–24L 25%, >24L 30%. Rebate makes taxable income up to ₹12L
+// tax-free; marginal relief just above ₹12L (tax can't exceed income over ₹12L).
+// Surcharge: 10% >₹50L, 15% >₹1Cr, 25% >₹2Cr (capped at 25% in new regime).
+const NEW_REGIME_SLABS = [
+  [400000, 800000, 0.05], [800000, 1200000, 0.10], [1200000, 1600000, 0.15],
+  [1600000, 2000000, 0.20], [2000000, 2400000, 0.25], [2400000, Infinity, 0.30],
+];
+const newRegimeSlabTax = (taxable) => {
+  let t = 0;
+  NEW_REGIME_SLABS.forEach(([lo, hi, r]) => { if (taxable > lo) t += (Math.min(taxable, hi) - lo) * r; });
+  return t;
+};
+const newRegimeTaxAfterRebate = (taxable) => {
+  const slab = newRegimeSlabTax(taxable);
+  if (taxable <= 1200000) return 0;
+  return Math.min(slab, taxable - 1200000);
+};
+
 // ── Animated background orbs + dot grid ──────────────────────────────────────
 function BackgroundOrbs() {
   return (
@@ -592,7 +612,7 @@ function FIRECalc() {
   );
 }
 
-// ── CTC to In-Hand Calculator (New Tax Regime FY2025-26) ─────────────────────
+// ── CTC to In-Hand Calculator (New Tax Regime, Tax Year 2026-27) ─────────────
 function CTCCalc() {
   const [ctc, setCtc] = useState(1200000);
   const [basicPct, setBasicPct] = useState(40);
@@ -603,8 +623,7 @@ function CTCCalc() {
   const [mealAllowance, setMealAllowance] = useState(true);
   const [bonus, setBonus] = useState(0);
   const [esop, setEsop] = useState(0);
-  const [showOptimiser, setShowOptimiser] = useState(false);
-
+  
   const stdDeduction = 75000;
   const professionalTax = 2400;
 
@@ -613,24 +632,19 @@ function CTCCalc() {
     const hra = ctc * (hPct / 100);
     const pfEmp = pf ? Math.min(basic * 0.12, 21600) : 0;
     const pfEmpr = pf ? Math.min(basic * 0.12, 21600) : 0;
-    const npsEmpr = nps ? Math.min(basic * 0.10, 150000) : 0;
+    const npsEmpr = nps ? Math.min(basic * 0.14, Math.max(0, 750000 - pfEmpr)) : 0; // employer NPS: up to 14% of basic in new regime; ₹7.5L employer PF+NPS cap
     const ltaAmt = ltaOn ? Math.min(ctc * 0.05, 50000) : 0;
     const mealAmt = mealOn ? 26400 : 0;
     const special = Math.max(0, ctc - basic - hra - pfEmpr - npsEmpr - ltaAmt - mealAmt);
     const gross = basic + hra + ltaAmt + mealAmt + special;
     const totalIncome = gross + bonus + esop;
-    const taxable = Math.max(0, totalIncome - stdDeduction - pfEmp);
-    const calcTax = (inc) => {
-      if (inc <= 300000) return 0;
-      let t = 0;
-      [[300000,700000,0.05],[700000,1000000,0.10],[1000000,1200000,0.15],[1200000,1500000,0.20],[1500000,Infinity,0.30]]
-        .forEach(([lo, hi, r]) => { if (inc > lo) t += (Math.min(inc, hi) - lo) * r; });
-      return t;
-    };
-    let tax = taxable <= 700000 ? 0 : calcTax(taxable);
+    // Employee PF is NOT deductible in the new regime; employer PF/NPS sit outside gross.
+    const taxable = Math.max(0, totalIncome - stdDeduction);
+    const tax = newRegimeTaxAfterRebate(taxable);
     let surcharge = 0;
     if (taxable > 5000000) surcharge = tax * 0.10;
     if (taxable > 10000000) surcharge = tax * 0.15;
+    if (taxable > 20000000) surcharge = tax * 0.25;
     const cess = (tax + surcharge) * 0.04;
     const totalTax = tax + surcharge + cess;
     const totalDed = totalTax + pfEmp + professionalTax;
@@ -640,18 +654,9 @@ function CTCCalc() {
   };
 
   const current = calcScenario(basicPct, hraPct, pfOpt, npsOpt, lta, mealAllowance);
-  const optimised = calcScenario(35, hraPct, pfOpt, true, true, true);
-  const annualSaving = (optimised.monthlyInHand - current.monthlyInHand) * 12;
-
-  const tips = [
-    { applied: basicPct <= 35, label:"Lower Basic to 35%", desc:"Reduces PF deduction and shifts more to tax-efficient allowances", action:() => setBasicPct(35) },
-    { applied: npsOpt, label:"Add NPS Employer (10% of basic)", desc:"Section 80CCD(2) — tax-free in new regime, builds retirement corpus", action:() => setNpsOpt(true) },
-    { applied: mealAllowance, label:"Add Meal Allowance ₹2,200/mo", desc:"₹26,400/year completely tax-free as food coupon/allowance", action:() => setMealAllowance(true) },
-    { applied: lta, label:"Add LTA Component", desc:"Tax-free reimbursement twice in a 4-year block for travel", action:() => setLta(true) },
-  ];
-
-  const unappliedTips = tips.filter(t => !t.applied);
-  const allApplied = unappliedTips.length === 0;
+  // The one big tax lever left in the new regime: employer NPS contribution
+  const withNps = calcScenario(basicPct, hraPct, pfOpt, true, lta, mealAllowance);
+  const npsTaxSaved = npsOpt ? 0 : Math.max(0, current.totalTax - withNps.totalTax);
   const taxColor = (r) => r < 10 ? "#00d09c" : r < 20 ? "#f59e0b" : "#ef4444";
 
   const Toggle = ({ label, value, onChange }) => (
@@ -671,7 +676,7 @@ function CTCCalc() {
 
       <div style={{ marginBottom:18 }}>
         <Toggle label="PF Contribution (12% of basic)" value={pfOpt} onChange={setPfOpt} />
-        <Toggle label="NPS Employer (10% basic, tax-free)" value={npsOpt} onChange={setNpsOpt} />
+        <Toggle label="Employer NPS (14% of basic, tax-deductible)" value={npsOpt} onChange={setNpsOpt} />
         <Toggle label="LTA Component" value={lta} onChange={setLta} />
         <Toggle label="Meal Allowance ₹2,200/mo" value={mealAllowance} onChange={setMealAllowance} />
       </div>
@@ -693,7 +698,7 @@ function CTCCalc() {
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:8 }}>
         <ResultCard label="Income Tax" value={rupee(current.totalTax)} />
         <ResultCard label="Effective Tax Rate" value={`${current.effectiveTaxRate.toFixed(1)}%`} />
-        <ResultCard label="PF (Employee)" value={rupee(current.pfEmp * 12)} />
+        <ResultCard label="PF (Employee, yearly)" value={rupee(current.pfEmp)} />
         <ResultCard label="Gross Salary" value={rupee(current.gross)} />
       </div>
 
@@ -714,67 +719,35 @@ function CTCCalc() {
         <div style={{ background:"rgba(248,250,252,0.85)", border:"1px solid rgba(245,158,11,0.2)", borderRadius:12, padding:"12px 16px", marginBottom:10 }}>
           <div style={{ color:"#fbbf24", fontSize:12, fontWeight:700, fontFamily:"Syne, sans-serif", marginBottom:6 }}>⚡ Bonus & ESOP Tax</div>
           {bonus > 0 && <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif", marginBottom:4 }}>Bonus taxed at your slab rate. TDS deducted by employer at payout.</div>}
-          {esop > 0 && <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif" }}>ESOP: perquisite tax at exercise (FMV − strike price). Separate LTCG/STCG when you sell. <span style={{ color:"#6366f1" }}>Hold 12+ months for 10% LTCG.</span></div>}
+          {esop > 0 && <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif" }}>ESOP: perquisite tax at exercise (FMV − strike price). Separate LTCG/STCG when you sell. <span style={{ color:"#6366f1" }}>Listed shares held 12+ months: 12.5% LTCG above ₹1.25L of gains.</span></div>}
         </div>
       )}
 
-      <div style={{ background:"rgba(248,250,252,0.85)", border:"1px solid rgba(99,102,241,0.2)", borderRadius:14, overflow:"hidden" }}>
-        <div onClick={() => setShowOptimiser(!showOptimiser)} style={{ padding:"14px 16px", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-          <div>
-            <div style={{ color:"#4f46e5", fontSize:13, fontWeight:700, fontFamily:"Syne, sans-serif" }}>
-              💡 Negotiation Optimiser {allApplied ? "✅" : ""}
-            </div>
-            <div style={{ color:"#334155", fontSize:11, marginTop:2, fontFamily:"DM Sans, sans-serif" }}>
-              {allApplied ? "All optimisations applied — max take-home achieved" : `Apply all → save ${rupee(annualSaving)} more/year`}
-            </div>
+      <div style={{ background:"rgba(248,250,252,0.85)", border:"1px solid rgba(99,102,241,0.2)", borderRadius:14, padding:"14px 16px" }}>
+        <div style={{ color:"#4f46e5", fontSize:13, fontWeight:700, fontFamily:"Syne, sans-serif", marginBottom:4 }}>💡 Tax-saving lever</div>
+        {current.totalTax < 1 ? (
+          <div style={{ color:"#334155", fontSize:12, fontFamily:"DM Sans, sans-serif", lineHeight:1.5 }}>
+            No income tax at this CTC under the new regime — taxable income up to ₹12L is tax-free after the rebate.
           </div>
-          <div style={{ color:"#6366f1", fontSize:16 }}>{showOptimiser ? "▲" : "▼"}</div>
-        </div>
-
-        {showOptimiser && (
-          <div style={{ padding:"0 16px 16px" }}>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:14 }}>
-              <div style={{ background:"rgba(226,232,240,0.9)", borderRadius:10, padding:"12px 10px", textAlign:"center" }}>
-                <div style={{ color:"#64748b", fontSize:10, marginBottom:4, textTransform:"uppercase", letterSpacing:0.8, fontFamily:"DM Sans, sans-serif" }}>Current Monthly</div>
-                <div style={{ color:"#1e293b", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif" }}>{rupee(current.monthlyInHand)}</div>
-                <div style={{ color:"#64748b", fontSize:10, marginTop:3, fontFamily:"DM Sans, sans-serif" }}>{current.effectiveTaxRate.toFixed(1)}% tax</div>
-              </div>
-              <div style={{ background:"linear-gradient(135deg,rgba(99,102,241,0.14),rgba(139,92,246,0.07))", border:"1px solid rgba(99,102,241,0.25)", borderRadius:10, padding:"12px 10px", textAlign:"center" }}>
-                <div style={{ color:"#4f46e5", fontSize:10, marginBottom:4, textTransform:"uppercase", letterSpacing:0.8, fontFamily:"DM Sans, sans-serif" }}>Fully Optimised</div>
-                <div style={{ color:"#4338ca", fontSize:18, fontWeight:800, fontFamily:"Syne, sans-serif" }}>{rupee(optimised.monthlyInHand)}</div>
-                <div style={{ color:"#64748b", fontSize:10, marginTop:3, fontFamily:"DM Sans, sans-serif" }}>{optimised.effectiveTaxRate.toFixed(1)}% tax</div>
-              </div>
+        ) : npsOpt ? (
+          <div style={{ color:"#334155", fontSize:12, fontFamily:"DM Sans, sans-serif", lineHeight:1.5 }}>
+            Employer NPS is applied — the main deduction the new regime still allows.
+          </div>
+        ) : (
+          <div>
+            <div style={{ color:"#334155", fontSize:12, fontFamily:"DM Sans, sans-serif", lineHeight:1.5, marginBottom:10 }}>
+              Ask HR to route up to 14% of basic into employer NPS: <strong>save {rupee(npsTaxSaved)} tax/year</strong>. Monthly in-hand drops slightly because that money goes into your NPS account.
             </div>
-
-            {tips.map(({ applied, label, desc, action }) => (
-              <div key={label} style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, marginBottom:8, padding:"10px 12px", background: applied ? "rgba(248,250,252,0.9)" : "rgba(255,255,255,0.75)", borderRadius:10, border:`1px solid ${applied ? "rgba(15,23,42,0.06)" : "rgba(15,23,42,0.06)"}`, opacity: applied ? 0.5 : 1 }}>
-                <div style={{ flex:1 }}>
-                  <div style={{ color: applied ? "#334155" : "#1e293b", fontSize:12, fontWeight:600, fontFamily:"DM Sans, sans-serif", marginBottom:2, textDecoration: applied ? "line-through" : "none" }}>{label}</div>
-                  <div style={{ color:"#334155", fontSize:11, fontFamily:"DM Sans, sans-serif" }}>{desc}</div>
-                </div>
-                <button onClick={action} disabled={applied} style={{
-                  flexShrink:0, padding:"5px 12px", borderRadius:8, border:"none",
-                  cursor: applied ? "default" : "pointer",
-                  background: applied ? "rgba(226,232,240,0.9)" : "linear-gradient(135deg,#6366f1,#8b5cf6)",
-                  color: applied ? "#334155" : "#fff",
-                  fontSize:11, fontWeight:700, fontFamily:"Syne, sans-serif", whiteSpace:"nowrap",
-                  transition:"all 0.2s",
-                }}>{applied ? "Applied ✓" : "Apply"}</button>
-              </div>
-            ))}
-
-            {!allApplied && (
-              <button onClick={() => { setBasicPct(35); setNpsOpt(true); setMealAllowance(true); setLta(true); }} style={{
-                width:"100%", padding:"10px", borderRadius:10, border:"none", cursor:"pointer",
-                background:"linear-gradient(135deg,#00d09c,#00b386)", color:"#fff",
-                fontSize:13, fontWeight:700, fontFamily:"Syne, sans-serif", marginTop:4,
-              }}>⚡ Apply All Optimisations</button>
-            )}
-            <div style={{ color:"#1e293b", fontSize:10, fontFamily:"DM Sans, sans-serif", lineHeight:1.5, marginTop:12 }}>
-              * New Tax Regime FY2025-26. Std deduction ₹75K. Rebate u/s 87A for taxable income ≤ ₹7L. Consult a CA for exact figures.
-            </div>
+            <button onClick={() => setNpsOpt(true)} style={{
+              width:"100%", padding:"10px", borderRadius:10, border:"none", cursor:"pointer",
+              background:"linear-gradient(135deg,#6366f1,#8b5cf6)", color:"#fff",
+              fontSize:13, fontWeight:700, fontFamily:"Syne, sans-serif",
+            }}>See it with employer NPS</button>
           </div>
         )}
+        <div style={{ color:"#64748b", fontSize:10, fontFamily:"DM Sans, sans-serif", lineHeight:1.5, marginTop:10 }}>
+          * New Tax Regime, Tax Year 2026-27. Std deduction ₹75K. Taxable income up to ₹12L is tax-free after rebate. HRA, LTA and meal exemptions don't apply in the new regime. Consult a CA for exact figures.
+        </div>
       </div>
     </div>
   );
@@ -855,14 +828,14 @@ function PPFCalc() {
   );
 }
 
-// ── Income Tax Calculator (Old vs New Regime, FY2025-26) ─────────────────────
+// ── Income Tax Calculator (Old vs New Regime, Tax Year 2026-27) ──────────────
 function IncomeTaxCalc() {
   const [income, setIncome] = useState(1500000);   // gross annual salary income
   const [ded80C, setDed80C] = useState(150000);    // 80C investments (max 1.5L)
   const [ded80D, setDed80D] = useState(25000);     // health insurance
   const [hra, setHra] = useState(0);               // HRA exemption claimed
 
-  // ── New Regime FY2025-26 ──
+  // ── New Regime, Tax Year 2026-27 (slabs unchanged by Budget 2026) ──
   // Slabs: 0–4L nil, 4–8L 5%, 8–12L 10%, 12–16L 15%, 16–20L 20%, 20–24L 25%, >24L 30%
   // Std deduction 75,000. Rebate 87A: full rebate if taxable ≤ 12L (up to ₹60,000).
   const newStdDed = 75000;
@@ -874,8 +847,8 @@ function IncomeTaxCalc() {
       .forEach(([lo,hi,r]) => { if (newTaxable > lo) t += (Math.min(newTaxable,hi) - lo) * r; });
     return t;
   })();
-  // 87A rebate — taxable income up to 12L pays zero
-  const newRebate = newTaxable <= 1200000 ? newSlabTax : 0;
+  // Rebate — taxable income up to 12L pays zero; marginal relief just above 12L
+  const newRebate = newSlabTax - newRegimeTaxAfterRebate(newTaxable);
   const newTaxAfterRebate = Math.max(0, newSlabTax - newRebate);
   const newCess = newTaxAfterRebate * 0.04;
   const newTotalTax = newTaxAfterRebate + newCess;
@@ -1233,7 +1206,12 @@ const AFFILIATES = {
   tax:  { label:"File your taxes online", url:"https://cleartax.in/?ref=paisamarg", cta:"File ITR →" },
 };
 
+// Disabled: "?ref=paisamarg" is not a tracked affiliate ID, so these earned nothing.
+// Re-enable per calculator once real affiliate links (e.g. EarnKaro/Cuelinks) exist.
+const AFFILIATES_ENABLED = false;
+
 function AffiliateNudge({ calcId }) {
+  if (!AFFILIATES_ENABLED) return null;
   const aff = AFFILIATES[calcId];
   if (!aff) return null;
   return (
@@ -1255,11 +1233,11 @@ const DISCLAIMERS = {
   prepay: "Prepayment savings are indicative and assume a fixed interest rate and no prepayment charges. Floating rates and lender prepayment rules vary. Check your loan agreement before prepaying.",
   cardemi: "Estimates are indicative. Actual credit card EMI cost depends on your bank's interest rate, processing fee, GST treatment and any discount adjustments on No-Cost EMI. Check your bank's terms.",
   sip:  "Mutual fund investments are subject to market risks. Returns shown are based on assumed rates and are not guaranteed. Past performance is not indicative of future results. Read all scheme documents carefully.",
-  fd:   "Interest rates vary by bank, tenure and deposit amount. Senior citizen rates may differ. TDS applicable on interest above ₹40,000/year (₹50,000 for seniors).",
-  ppf:  "PPF interest rate is set by the Government of India and reviewed quarterly. The 7.1% rate is current as of FY2025-26 and may change. Partial withdrawal rules apply after year 6.",
+  fd:   "Interest rates vary by bank, tenure and deposit amount. Senior citizen rates may differ. Banks deduct TDS if your interest from one bank exceeds ₹50,000/year (₹1 lakh for senior citizens).",
+  ppf:  "PPF interest rate is set by the Government of India and reviewed quarterly. The 7.1% rate applies for Oct–Dec 2026 and may change. Partial withdrawal rules apply after year 6.",
   fire: "Retirement projections are illustrative estimates based on assumed inflation and return rates. Actual outcomes will vary. This is not a financial plan. Consult a SEBI-registered investment advisor.",
-  ctc:  "Tax calculations are indicative under the New Tax Regime FY2025-26. Actual liability depends on your specific salary structure, exemptions, and employer TDS. Consult a qualified CA for exact figures.",
-  tax:  "Tax estimates are indicative for FY2025-26 (AY2026-27) and assume a salaried individual below 60. Surcharge for high incomes, marginal relief, and other deductions are simplified. Consult a qualified CA for exact figures.",
+  ctc:  "Tax calculations are indicative under the New Tax Regime for Tax Year 2026-27 (Income-tax Act, 2025). Actual liability depends on your specific salary structure, exemptions, and employer TDS. Consult a qualified CA for exact figures.",
+  tax:  "Tax estimates are indicative for Tax Year 2026-27 (Income-tax Act, 2025; slabs unchanged by Budget 2026) and assume a salaried individual below 60. Surcharge for high incomes and other deductions are simplified. Consult a qualified CA for exact figures.",
 };
 
 function DisclaimerBar({ calcId }) {
@@ -1285,7 +1263,11 @@ function DisclaimerBar({ calcId }) {
   );
 }
 
+// Disabled until an ad network is approved — never show placeholders to users.
+const ADS_ENABLED = false;
+
 function AdSlot({ position = "inline" }) {
+  if (!ADS_ENABLED) return null;
   return (
     <div style={{ margin:"14px 0", background:"rgba(248,250,252,0.9)", border:"1px dashed rgba(226,232,240,0.9)", borderRadius:12, padding:"14px", textAlign:"center", minHeight: position === "banner" ? 90 : 60, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:4 }}>
       <div style={{ color:"#1e293b", fontSize:10, fontFamily:"DM Sans, sans-serif" }}>Ad</div>
@@ -1320,7 +1302,7 @@ function GlobalDisclaimer({ onAccept }) {
         <button onClick={onAccept} style={{ width:"100%", marginTop:20, padding:"15px", borderRadius:14, border:"none", cursor:"pointer", background:"linear-gradient(135deg,#00d09c,#00b386)", color:"#fff", fontSize:15, fontWeight:800, fontFamily:"Syne, sans-serif", boxShadow:"0 8px 24px rgba(0,208,156,0.28)" }}>
           I Understand — Let me Calculate
         </button>
-        <div style={{ color:"#1e293b", fontSize:10, fontFamily:"DM Sans, sans-serif", textAlign:"center", marginTop:10 }}>Shown once · Stored locally · No data collected</div>
+        <div style={{ color:"#1e293b", fontSize:10, fontFamily:"DM Sans, sans-serif", textAlign:"center", marginTop:10 }}>Shown once · Saved on your device</div>
       </div>
     </div>
   );
@@ -1347,7 +1329,7 @@ const CATEGORIES = [
 ];
 
 // ── SEO metadata — per calculator + info pages ────────────────────────────────
-const SITE_URL = "https://paisamarg.in";
+const SITE_URL = "https://www.paisamarg.in";
 
 const SEO = {
   home: {
@@ -1384,11 +1366,11 @@ const SEO = {
   },
   ctc: {
     title: "Salary Calculator — CTC to In-Hand (New Tax Regime) | PaisaMarg",
-    description: "Convert your CTC to monthly in-hand salary under the new tax regime FY2025-26. See tax, PF, and optimise your structure.",
+    description: "Convert your CTC to monthly in-hand salary under the new tax regime for 2026-27. See tax, PF, and optimise your structure.",
   },
   tax: {
-    title: "Income Tax Calculator — Old vs New Regime FY2025-26 | PaisaMarg",
-    description: "Compare old vs new tax regime side by side for FY2025-26. See which regime saves you more tax with 80C, 80D and HRA deductions.",
+    title: "Income Tax Calculator — Old vs New Regime 2026-27 | PaisaMarg",
+    description: "Compare old vs new tax regime side by side for 2026-27. See which regime saves you more tax with 80C, 80D and HRA deductions.",
   },
   about:      { title: "About PaisaMarg — Money Tools for India", description: "Learn about PaisaMarg, free personal finance calculators built for Indian users." },
   contact:    { title: "Contact PaisaMarg", description: "Get in touch with the PaisaMarg team." },
@@ -1536,16 +1518,18 @@ function HomeScreen({ onSelect }) {
 
       {showNotify && <NotifyModal onClose={() => setShowNotify(false)} />}
 
-      {/* Coming soon teaser */}
+      {/* Coming soon teaser — shown only once email capture works */}
+      {supabaseReady && (
       <div style={{ margin:"16px 20px 0", background:"rgba(59,130,246,0.07)", backdropFilter:"blur(8px)", WebkitBackdropFilter:"blur(8px)", border:"1px solid rgba(59,130,246,0.14)", borderRadius:16, padding:"14px 16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <div>
           <div style={{ color:"#1e293b", fontSize:13, fontWeight:600, fontFamily:"Syne, sans-serif" }}>More calculators coming</div>
-          <div style={{ color:"#64748b", fontSize:11, marginTop:2, fontFamily:"DM Sans, sans-serif" }}>Tax regime, NPS, Rent vs Buy & more</div>
+          <div style={{ color:"#64748b", fontSize:11, marginTop:2, fontFamily:"DM Sans, sans-serif" }}>NPS, Rent vs Buy, Gratuity & more</div>
         </div>
         <button onClick={() => setShowNotify(true)} style={{ background:"linear-gradient(135deg,#3b82f6,#6366f1)", color:"#fff", padding:"8px 14px", borderRadius:10, fontSize:12, fontWeight:700, fontFamily:"Syne, sans-serif", cursor:"pointer", border:"none", boxShadow:"0 4px 14px rgba(99,102,241,0.28)", flexShrink:0 }}>
           Notify Me
         </button>
       </div>
+      )}
 
       <div style={{ padding:"0 20px" }}>
         <AdSlot position="banner" />
@@ -2035,7 +2019,7 @@ export default function PaisaMarg() {
                 <EmailModal
                   onClose={() => setEmailModal(false)}
                   subject={`My ${activeCalc?.label} — PaisaMarg`}
-                  body={`Hi,\n\nHere are my ${activeCalc?.label} results from PaisaMarg.\n\nVisit https://paisamarg.in to recalculate.\n\n— PaisaMarg`}
+                  body={`Hi,\n\nHere are my ${activeCalc?.label} results from PaisaMarg.\n\nVisit https://www.paisamarg.in to recalculate.\n\n— PaisaMarg`}
                   source={activeId}
                 />
               )}
@@ -2046,7 +2030,7 @@ export default function PaisaMarg() {
                   <div style={{ color:"#0f172a", fontSize:20, fontWeight:800, fontFamily:"Syne, sans-serif" }}>{activeCalc?.label}</div>
                   <div style={{ color:"#334155", fontSize:12, marginTop:3, fontFamily:"DM Sans, sans-serif" }}>{activeCalc?.tagline}</div>
                 </div>
-                <button onClick={() => setEmailModal(true)} style={{
+                {supabaseReady && <button onClick={() => setEmailModal(true)} style={{
                   flexShrink:0,
                   background:"rgba(241,245,249,0.85)",
                   backdropFilter:"blur(8px)", WebkitBackdropFilter:"blur(8px)",
@@ -2054,7 +2038,7 @@ export default function PaisaMarg() {
                   borderRadius:10, padding:"8px 12px", cursor:"pointer", color:"#64748b",
                   fontSize:11, fontWeight:700, fontFamily:"Syne, sans-serif",
                   display:"flex", alignItems:"center", gap:5, marginLeft:10,
-                }}>📧 Email</button>
+                }}>📧 Email</button>}
               </div>
 
               {/* Calculator card — frosted white */}
