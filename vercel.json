@@ -1,17 +1,56 @@
 {
   "rewrites": [
-    { "source": "/emi", "destination": "/index.html" },
-    { "source": "/prepay", "destination": "/index.html" },
-    { "source": "/cardemi", "destination": "/index.html" },
-    { "source": "/sip", "destination": "/index.html" },
-    { "source": "/fd", "destination": "/index.html" },
-    { "source": "/ppf", "destination": "/index.html" },
-    { "source": "/fire", "destination": "/index.html" },
-    { "source": "/ctc", "destination": "/index.html" },
-    { "source": "/tax", "destination": "/index.html" },
-    { "source": "/about", "destination": "/index.html" },
-    { "source": "/contact", "destination": "/index.html" },
-    { "source": "/privacy", "destination": "/index.html" },
-    { "source": "/disclaimer", "destination": "/index.html" }
+    {
+      "source": "/emi",
+      "destination": "/emi.html"
+    },
+    {
+      "source": "/prepay",
+      "destination": "/prepay.html"
+    },
+    {
+      "source": "/cardemi",
+      "destination": "/cardemi.html"
+    },
+    {
+      "source": "/sip",
+      "destination": "/sip.html"
+    },
+    {
+      "source": "/fd",
+      "destination": "/fd.html"
+    },
+    {
+      "source": "/ppf",
+      "destination": "/ppf.html"
+    },
+    {
+      "source": "/fire",
+      "destination": "/fire.html"
+    },
+    {
+      "source": "/ctc",
+      "destination": "/ctc.html"
+    },
+    {
+      "source": "/tax",
+      "destination": "/tax.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/about.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/contact.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/disclaimer",
+      "destination": "/disclaimer.html"
+    }
   ]
 }
