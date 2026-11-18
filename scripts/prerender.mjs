@@ -4,6 +4,7 @@
 // JavaScript ran, so Google treated the calculators as duplicates of "/".
 import { readFileSync, writeFileSync } from "node:fs";
 import { SEO } from "../src/seo.js";
+import { CONTENT } from "../src/content.js";
 
 const SITE = "https://www.paisamarg.in";
 const ROUTES = ["emi", "prepay", "cardemi", "sip", "fd", "ppf", "fire", "ctc", "tax",
@@ -34,10 +35,23 @@ function page(key) {
   html = swap(html, /<meta name="twitter:title" content="[^"]*" \/>/, `<meta name="twitter:title" content="${esc(meta.title)}" />`);
   html = swap(html, /<meta name="twitter:description" content="[^"]*" \/>/, `<meta name="twitter:description" content="${esc(meta.description)}" />`);
   // Crawlable content inside #root; React replaces it on load.
+  const c = CONTENT[key];
+  const body = c
+    ? `<p>${esc(c.intro)}</p>` +
+      c.sections.map((sec) => `<h2>${esc(sec.h)}</h2>` + sec.p.map((t) => `<p>${esc(t)}</p>`).join("")).join("") +
+      `<h2>Common questions</h2>` +
+      c.faqs.map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join("")
+    : `<p>${esc(meta.description)}</p>`;
   html = swap(html, /<div id="root"><\/div>/,
     `<div id="root"><main style="max-width:480px;margin:0 auto;padding:24px 20px;font-family:sans-serif;color:#0f172a">` +
-    `<h1>${esc(h1)}</h1><p>${esc(meta.description)}</p>` +
+    `<h1>${esc(h1)}</h1>${body}` +
     `<nav aria-label="Calculators"><ul>${nav}</ul></nav></main></div>`);
+  // FAQ structured data for pages that have FAQs
+  if (c?.faqs?.length) {
+    const ld = { "@context": "https://schema.org", "@type": "FAQPage",
+      mainEntity: c.faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
+    html = swap(html, /<\/head>/, `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, "\\u003c")}</script>\n  </head>`);
+  }
   return html;
 }
 

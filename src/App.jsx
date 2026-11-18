@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { SEO } from "./seo.js";
+import { CONTENT } from "./content.js";
 
 // ── Global CSS — injected once on mount ───────────────────────────────────────
 const GLOBAL_CSS = `
@@ -929,7 +930,7 @@ function IncomeTaxCalc() {
       <div style={{ background:"rgba(99,102,241,0.06)", border:"1px solid rgba(99,102,241,0.15)", borderRadius:12, padding:"12px 14px", marginTop:12 }}>
         <div style={{ color:"#4f46e5", fontSize:12, fontWeight:700, fontFamily:"Syne, sans-serif", marginBottom:5 }}>💡 Quick guide</div>
         <div style={{ color:"#64748b", fontSize:11, fontFamily:"DM Sans, sans-serif", lineHeight:1.6 }}>
-          The <strong>New Regime</strong> has lower rates but no deductions — best if you don't invest much. The <strong>Old Regime</strong> rewards 80C/80D/HRA — best if you claim a lot. Under the new regime, income up to ₹12L is effectively tax-free.
+          The <strong>New Regime</strong> has lower rates but almost no deductions, so it suits most people. The <strong>Old Regime</strong> rewards 80C, 80D and HRA, so it only wins if you claim a lot. Under the new regime, income up to ₹12L is effectively tax-free.
         </div>
       </div>
     </div>
@@ -1240,6 +1241,48 @@ const DISCLAIMERS = {
   ctc:  "Tax calculations are indicative under the New Tax Regime for Tax Year 2026-27 (Income-tax Act, 2025). Actual liability depends on your specific salary structure, exemptions, and employer TDS. Consult a qualified CA for exact figures.",
   tax:  "Tax estimates are indicative for Tax Year 2026-27 (Income-tax Act, 2025; slabs unchanged by Budget 2026) and assume a salaried individual below 60. Surcharge for high incomes and other deductions are simplified. Consult a qualified CA for exact figures.",
 };
+
+// ── Explainer + FAQs under selected calculators (content lives in content.js) ──
+function PageContent({ calcId, onOpen }) {
+  const c = CONTENT[calcId];
+  if (!c) return null;
+  const H2 = { color:"#0f172a", fontSize:17, fontWeight:800, fontFamily:"Syne, sans-serif", margin:"22px 0 8px", lineHeight:1.3 };
+  const P  = { color:"#334155", fontSize:14, fontFamily:"DM Sans, sans-serif", lineHeight:1.65, margin:"0 0 10px" };
+  return (
+    <section style={{ marginTop:18, background:"rgba(255,255,255,0.8)", border:"1px solid rgba(15,23,42,0.06)", borderRadius:18, padding:"4px 18px 18px" }}>
+      {c.sections.map(sec => (
+        <div key={sec.h}>
+          <h2 style={H2}>{sec.h}</h2>
+          {sec.p.map((t, i) => <p key={i} style={P}>{t}</p>)}
+        </div>
+      ))}
+      <h2 style={H2}>Common questions</h2>
+      {c.faqs.map(f => (
+        <details key={f.q} style={{ borderTop:"1px solid rgba(15,23,42,0.07)", padding:"10px 0" }}>
+          <summary style={{ cursor:"pointer", color:"#0f172a", fontSize:14, fontWeight:700, fontFamily:"DM Sans, sans-serif", lineHeight:1.45 }}>{f.q}</summary>
+          <p style={{ ...P, marginTop:8 }}>{f.a}</p>
+        </details>
+      ))}
+      {c.related?.length > 0 && (
+        <div style={{ marginTop:16 }}>
+          <div style={{ color:"#64748b", fontSize:11, textTransform:"uppercase", letterSpacing:0.8, fontFamily:"DM Sans, sans-serif", marginBottom:8 }}>Related calculators</div>
+          <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
+            {c.related.map(id => {
+              const calc = CALCULATORS.find(x => x.id === id);
+              if (!calc) return null;
+              return (
+                <a key={id} href={`/${id}`} onClick={(e) => { e.preventDefault(); onOpen(id); }}
+                   style={{ textDecoration:"none", background:"rgba(241,245,249,0.9)", border:"1px solid rgba(15,23,42,0.07)", borderRadius:10, padding:"7px 12px", color:"#1e293b", fontSize:12, fontWeight:700, fontFamily:"Syne, sans-serif" }}>
+                  {calc.icon} {calc.label}
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
 
 function DisclaimerBar({ calcId }) {
   const [expanded, setExpanded] = useState(false);
@@ -1984,6 +2027,7 @@ export default function PaisaMarg() {
                 <div>
                   <div style={{ color:"#0f172a", fontSize:20, fontWeight:800, fontFamily:"Syne, sans-serif" }}>{activeCalc?.label}</div>
                   <div style={{ color:"#334155", fontSize:12, marginTop:3, fontFamily:"DM Sans, sans-serif" }}>{activeCalc?.tagline}</div>
+                  {CONTENT[activeId]?.intro && <div style={{ color:"#475569", fontSize:13, marginTop:8, lineHeight:1.5, fontFamily:"DM Sans, sans-serif" }}>{CONTENT[activeId].intro}</div>}
                 </div>
                 {supabaseReady && <button onClick={() => setEmailModal(true)} style={{
                   flexShrink:0,
@@ -2011,6 +2055,7 @@ export default function PaisaMarg() {
               <AdSlot position="inline" />
               <AffiliateNudge calcId={activeId} />
               <DisclaimerBar calcId={activeId} />
+              <PageContent calcId={activeId} onOpen={openCalc} />
             </div>
           )}
         </div>
